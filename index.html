@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Idle City Tycoon</title>
+    <title>Open World Idle City Tycoon</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -16,12 +16,11 @@
             align-items: center;
             min-height: 100vh;
         }
-        /* Phone Frame Design */
         .phone-frame {
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
             background: #161b22;
-            padding: 20px;
+            padding: 15px;
             border-radius: 35px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.8);
             border: 4px solid #30363d;
@@ -30,274 +29,251 @@
         }
         h1 {
             color: #58a6ff;
-            font-size: 1.5rem;
-            margin-top: 5px;
-        }
-        h2 {
-            color: #3fb950;
-            font-size: 1.2rem;
-            margin-bottom: 10px;
+            font-size: 1.3rem;
+            margin: 5px 0;
         }
         .container {
             background: #21262d;
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 15px;
-            box-shadow: inset 0 1px 3px rgba(255,255,255,0.1);
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 10px;
         }
         .stats {
-            font-size: 1rem;
-            margin: 10px 0;
+            font-size: 0.9rem;
             background: #30363d;
-            padding: 10px;
+            padding: 8px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-around;
+        }
+        /* Canvas Map View */
+        #gameMap {
+            background: #090d12;
             border-radius: 8px;
+            border: 2px solid #30363d;
+            display: block;
+            margin: 0 auto 10px auto;
         }
         button {
             background-color: #238636;
             color: white;
             border: none;
-            padding: 10px 15px;
-            font-size: 0.95rem;
+            padding: 8px 12px;
+            font-size: 0.85rem;
             border-radius: 6px;
             cursor: pointer;
-            margin: 5px 0;
-            width: 100%;
+            margin: 3px;
             font-weight: bold;
-            transition: background 0.2s;
         }
-        button:hover {
-            background-color: #2ea043;
+        button:hover { background-color: #2ea043; }
+        button:disabled { background-color: #484f58; color: #8b949e; cursor: not-allowed; }
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+            margin-top: 5px;
         }
-        button:disabled {
-            background-color: #484f58;
-            cursor: not-allowed;
-            color: #8b949e;
-        }
-        .ad-button {
-            background-color: #8957e5;
-        }
-        .ad-button:hover {
-            background-color: #a371f7;
-        }
-        .shop-item {
-            display: flex;
-            flex-direction: column;
-            background: #30363d;
-            padding: 10px;
-            margin: 8px 0;
-            border-radius: 8px;
-            text-align: right;
-        }
-        .shop-item span {
-            font-size: 0.9rem;
-            margin-bottom: 5px;
-        }
-        .hidden {
-            display: none;
-        }
+        .controls-grid button { width: 100%; padding: 12px; font-size: 1.1rem; }
+        .empty-space { background: transparent; border: none; cursor: default; }
         #message {
             color: #d29922;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: bold;
-            min-height: 35px;
-            margin-top: 10px;
+            min-height: 30px;
             display: flex;
             align-items: center;
             justify-content: center;
+        }
+        .shop-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #30363d;
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            text-align: left;
         }
     </style>
 </head>
 <body>
 
     <div class="phone-frame">
-        <h1>Idle City Tycoon</h1>
-        <div id="message">Welcome! Start working to earn your first cash.</div>
+        <h1>Open World City Tycoon</h1>
+        <div id="message">Use Joystick/Arrows to explore the city & enter buildings!</div>
         
         <div class="container stats">
-            <div>Cash: <strong>$<span id="money">0</span></strong></div>
-            <div>Income: <strong>$<span id="cps">0</span>/sec</strong></div>
-            <div>Status: <span id="status">Regular Citizen</span></div>
+            <div>Cash: <b>$<span id="money">0</span></b></div>
+            <div>Income: <b>$<span id="cps">0</span>/s</b></div>
+            <div>Vehicle: <span id="vehicle-name">Walking</span></div>
         </div>
 
-        <!-- Working Section -->
-        <div class="container" id="work-section">
-            <button onclick="work()">Work Hard & Earn Cash</button>
-        </div>
+        <!-- Canvas for Game World -->
+        <canvas id="gameMap" width="380" height="200"></canvas>
 
-        <!-- Ad Rewards Section -->
+        <!-- Movement Controls for Mobile -->
         <div class="container">
-            <button class="ad-button" onclick="watchAd()">📺 Watch Ad for +$500 Cash</button>
+            <div class="controls-grid">
+                <div class="empty-space"></div>
+                <button onclick="movePlayer(0, -1)">⬆️</button>
+                <div class="empty-space"></div>
+                <button onclick="movePlayer(-1, 0)">⬅️</button>
+                <button onclick="interact()">⭐ Action</button>
+                <button onclick="movePlayer(1, 0)">➡️</button>
+                <div class="empty-space"></div>
+                <button onclick="movePlayer(0, 1)">⬇️</button>
+                <div class="empty-space"></div>
+            </div>
         </div>
 
-        <!-- Jobs Section -->
-        <div id="jobs-section" class="container hidden">
-            <h2>Job Market</h2>
-            <div id="jobs-list"></div>
+        <!-- Dynamic Interaction Panel -->
+        <div id="action-panel" class="container">
+            <h3 id="panel-title" style="margin: 5px 0; color: #58a6ff; font-size: 1rem;">Explore the Map</h3>
+            <div id="panel-content">Walk to locations like the Pier, Office, Car Wash, or Car Shop!</div>
         </div>
 
-        <!-- Businesses Section -->
-        <div id="business-section" class="container hidden">
-            <h2>Your Businesses</h2>
-            <div id="businesses-list"></div>
-        </div>
-
-        <!-- City Section -->
-        <div id="city-section" class="container hidden">
-            <h2>Your City ("New Haven")</h2>
-            <div id="city-list"></div>
+        <!-- Business & Empire Panel -->
+        <div class="container">
+            <h3 style="margin: 5px 0; color: #3fb950; font-size: 1rem;">Empire & Transport</h3>
+            <div id="empire-list"></div>
         </div>
     </div>
 
     <script>
         let game = {
-            money: 0,
+            money: 10,
             cps: 0,
-            jobLevel: 0,
-            businesses: { kiosk: 0, store: 0, factory: 0 },
-            cityBuildings: { houses: 0, park: 0, skyscraper: 0 }
+            x: 5,
+            y: 5,
+            speed: 1,
+            vehicle: 'walking', // walking, bike, car
+            businesses: { kiosk: 0, factory: 0 },
+            properties: { newTown: 0 }
         };
 
-        const jobs = [
-            { name: "Restaurant Dishwasher", pay: 1, cost: 0, unlocked: true },
-            { name: "Convenience Store Clerk", pay: 5, cost: 100, unlocked: false },
-            { name: "Shift Manager", pay: 20, cost: 500, unlocked: false }
-        ];
-
-        const businessesData = {
-            kiosk: { name: "Neighborhood Kiosk", cost: 1000, income: 10 },
-            store: { name: "Supermarket", cost: 7500, income: 60 },
-            factory: { name: "Tech Factory", cost: 40000, income: 300 }
+        // Map layout elements (Grid 10x10)
+        // Locations: 0=Road, 1=Pier (Fisherman), 2=Office, 3=CarWash, 4=CarShop, 5=RealEstate
+        const locations = {
+            "1,1": { name: "Ocean Pier (Fisherman Job)", type: "job", jobName: "Fisherman", pay: 2, desc: "Catch fish for cash!" },
+            "8,2": { name: "Corporate Office", type: "job", jobName: "Office Worker", pay: 6, desc: "Paperwork and spreadsheets." },
+            "2,8": { name: "City Car Wash", type: "job", jobName: "Car Cleaner", pay: 10, desc: "Wash vehicles to earn money." },
+            "8,8": { name: "Vehicle Dealership", type: "shop", item: "car", cost: 500, desc: "Buy a Car to move faster!" },
+            "5,5": { name: "New Town Construction", type: "city", item: "newTown", cost: 5000, desc: "Build your own satellite city!" }
         };
 
-        const cityData = {
-            houses: { name: "Residential Area", cost: 100000, income: 1000 },
-            park: { name: "City Park", cost: 500000, income: 5000 },
-            skyscraper: { name: "Mega Commercial Center", cost: 2500000, income: 25000 }
-        };
+        const canvas = document.getElementById("gameMap");
+        const ctx = canvas.getContext("2d");
+
+        function drawMap() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            let tileSize = 38;
+
+            // Draw grid and spots
+            for (let rx = 0; rx < 10; rx++) {
+                for (let ry = 0; ry < 10; ry++) {
+                    ctx.fillStyle = "#161b22";
+                    ctx.fillRect(rx * tileSize + 2, ry * tileSize + 2, tileSize - 4, tileSize - 4);
+
+                    let key = `${rx},${ry}`;
+                    if (locations[key]) {
+                        ctx.fillStyle = locations[key].type === 'job' ? '#1f6feb' : (locations[key].type === 'shop' ? '#8957e5' : '#f85149');
+                        ctx.fillRect(rx * tileSize + 6, ry * tileSize + 6, tileSize - 12, tileSize - 12);
+                    }
+                }
+            }
+
+            // Draw Player
+            ctx.fillStyle = "#3fb950";
+            ctx.beginPath();
+            ctx.arc(game.x * tileSize + 19, game.y * tileSize + 19, 10, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function movePlayer(dx, dy) {
+            let newX = game.x + (dx * game.speed);
+            let newY = game.y + (dy * game.speed);
+            if (newX >= 0 && newX < 10 && newY >= 0 && newY < 10) {
+                game.x = newX;
+                game.y = newY;
+                checkLocation();
+                drawMap();
+            }
+        }
+
+        // Keyboard controls support
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowUp' || e.key === 'w') movePlayer(0, -1);
+            if (e.key === 'ArrowDown' || e.key === 's') movePlayer(0, 1);
+            if (e.key === 'ArrowLeft' || e.key === 'a') movePlayer(-1, 0);
+            if (e.key === 'ArrowRight' || e.key === 'd') movePlayer(1, 0);
+            if (e.key === 'e' || e.key === 'Enter') interact();
+        });
+
+        function checkLocation() {
+            let key = `${game.x},${game.y}`;
+            let panelTitle = document.getElementById('panel-title');
+            let panelContent = document.getElementById('panel-content');
+
+            if (locations[key]) {
+                let loc = locations[key];
+                panelTitle.innerText = loc.name;
+                panelContent.innerHTML = `${loc.desc}<br><button onclick="interact()">Interact / Work</button>`;
+            } else {
+                panelTitle.innerText = "Streets of Open City";
+                panelContent.innerHTML = "Explore the map to find Jobs, Car Shops, and City Building zones!";
+            }
+        }
+
+        function interact() {
+            let key = `${game.x},${game.y}`;
+            let loc = locations[key];
+            if (!loc) {
+                document.getElementById('message').innerText = "Nothing to do here. Walk to colored blocks!";
+                return;
+            }
+
+            if (loc.type === 'job') {
+                game.money += loc.pay;
+                document.getElementById('message').innerText = `Worked as ${loc.jobName}! Earned +$${loc.pay}`;
+                updateUI();
+            } else if (loc.type === 'shop' && loc.item === 'car') {
+                if (game.money >= loc.cost && game.vehicle === 'walking') {
+                    game.money -= loc.cost;
+                    game.vehicle = 'car';
+                    game.speed = 2; // Move faster!
+                    document.getElementById('vehicle-name').innerText = "Sports Car";
+                    document.getElementById('message').innerText = "Purchased a Car! You now move 2 blocks at a time.";
+                    updateUI();
+                } else {
+                    document.getElementById('message').innerText = "Already bought or not enough cash ($500 needed)!";
+                }
+            } else if (loc.type === 'city') {
+                if (game.money >= loc.cost) {
+                    game.money -= loc.cost;
+                    game.properties.newTown++;
+                    game.cps += 50;
+                    loc.cost = Math.floor(loc.cost * 1.5);
+                    document.getElementById('message').innerText = "Built a district in your new city! +$50/sec";
+                    updateUI();
+                } else {
+                    document.getElementById('message').innerText = "Building a city requires $5,000!";
+                }
+            }
+        }
 
         function updateUI() {
             document.getElementById('money').innerText = Math.floor(game.money).toLocaleString();
             document.getElementById('cps').innerText = game.cps.toLocaleString();
             
-            if (game.money >= 50 || game.jobLevel > 0) {
-                document.getElementById('jobs-section').classList.remove('hidden');
-                renderJobs();
+            let empireHTML = `<div class="shop-row"><span>New Town Districts: ${game.properties.newTown}</span><span>+$50/s</span></div>`;
+            if (game.vehicle === 'car') {
+                empireHTML += `<div class="shop-row"><span>Transport: Sports Car</span><span>Active</span></div>`;
             }
-            if (game.money >= 800 || totalBusinesses() > 0) {
-                document.getElementById('business-section').classList.remove('hidden');
-                renderBusinesses();
-            }
-            if (game.money >= 80000 || totalCity() > 0) {
-                document.getElementById('city-section').classList.remove('hidden');
-                renderCity();
-            }
-
-            updateStatusText();
+            document.getElementById('empire-list').innerHTML = empireHTML;
         }
 
-        function totalBusinesses() {
-            return Object.values(game.businesses).reduce((a, b) => a + b, 0);
-        }
-
-        function totalCity() {
-            return Object.values(game.cityBuildings).reduce((a, b) => a + b, 0);
-        }
-
-        function work() {
-            let currentPay = jobs[game.jobLevel].pay;
-            game.money += currentPay;
-            updateUI();
-        }
-
-        function watchAd() {
-            document.getElementById('message').innerText = "Simulating Ad... Enjoying your reward!";
-            setTimeout(() => {
-                game.money += 500;
-                document.getElementById('message').innerText = "Ad finished! You received +$500!";
-                updateUI();
-            }, 1000);
-        }
-
-        function renderJobs() {
-            let html = '';
-            jobs.forEach((job, index) => {
-                if (game.money >= job.cost / 2 || index <= game.jobLevel) {
-                    let isCurrent = game.jobLevel === index;
-                    html += `<div class="shop-item">
-                        <span><b>${job.name}</b> (Pay: $${job.pay}/click)</span>
-                        <button ${isCurrent ? 'disabled' : ''} onclick="setJob(${index})">${isCurrent ? 'Current Job' : 'Work Here'}</button>
-                    </div>`;
-                }
-            });
-            document.getElementById('jobs-list').innerHTML = html;
-        }
-
-        function setJob(index) {
-            game.jobLevel = index;
-            document.getElementById('message').innerText = `Switched job to: ${jobs[index].name}!`;
-            updateUI();
-        }
-
-        function renderBusinesses() {
-            let html = '';
-            for (let key in businessesData) {
-                let biz = businessesData[key];
-                html += `<div class="shop-item">
-                    <span><b>${biz.name}</b> (Owned: ${game.businesses[key]})<br>Cost: $${biz.cost.toLocaleString()} | +${biz.income}/sec</span>
-                    <button onclick="buyBusiness('${key}')">Buy Business</button>
-                </div>`;
-            }
-            document.getElementById('businesses-list').innerHTML = html;
-        }
-
-        function buyBusiness(key) {
-            let biz = businessesData[key];
-            if (game.money >= biz.cost) {
-                game.money -= biz.cost;
-                game.businesses[key]++;
-                game.cps += biz.income;
-                biz.cost = Math.floor(biz.cost * 1.15);
-                document.getElementById('message').innerText = `Successfully purchased ${biz.name}!`;
-                updateUI();
-            } else {
-                document.getElementById('message').innerText = "Not enough cash for this business.";
-            }
-        }
-
-        function renderCity() {
-            let html = '';
-            for (let key in cityData) {
-                let building = cityData[key];
-                html += `<div class="shop-item">
-                    <span><b>${building.name}</b> (Built: ${game.cityBuildings[key]})<br>Cost: $${building.cost.toLocaleString()} | +${building.income}/sec</span>
-                    <button onclick="buyCityBuilding('${key}')">Build</button>
-                </div>`;
-            }
-            document.getElementById('city-list').innerHTML = html;
-        }
-
-        function buyCityBuilding(key) {
-            let building = cityData[key];
-            if (game.money >= building.cost) {
-                game.money -= building.cost;
-                game.cityBuildings[key]++;
-                game.cps += building.income;
-                building.cost = Math.floor(building.cost * 1.2);
-                document.getElementById('message').innerText = `Built new city block: ${building.name}!`;
-                updateUI();
-            } else {
-                document.getElementById('message').innerText = "Urban real estate requires more capital!";
-            }
-        }
-
-        function updateStatusText() {
-            let status = "Regular Citizen";
-            if (totalCity() > 0) status = "Mayor & Metropolis Founder";
-            else if (totalBusinesses() > 0) status = "Business Owner & Entrepreneur";
-            else if (game.jobLevel > 0) status = "Advanced Employee";
-            document.getElementById('status').innerText = status;
-        }
-
+        // Idle income tick
         setInterval(() => {
             if (game.cps > 0) {
                 game.money += game.cps / 10;
@@ -305,6 +281,7 @@
             }
         }, 100);
 
+        drawMap();
         updateUI();
     </script>
 </body>
