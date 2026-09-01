@@ -1,112 +1,151 @@
-
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>עיר בחולות - משחק אידל</title>
+    <title>Idle City Tycoon</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #121212;
-            color: #e0e0e0;
+            background-color: #0d1117;
+            color: #c9d1d9;
             margin: 0;
-            padding: 20px;
+            padding: 10px;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
+            min-height: 100vh;
         }
-        h1, h2 {
-            color: #4CAF50;
-        }
-        .container {
+        /* Phone Frame Design */
+        .phone-frame {
             width: 100%;
-            max-width: 600px;
-            background: #1e1e1e;
+            max-width: 400px;
+            background: #161b22;
             padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            margin-bottom: 20px;
+            border-radius: 35px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            border: 4px solid #30363d;
+            box-sizing: border-box;
             text-align: center;
         }
-        .stats {
+        h1 {
+            color: #58a6ff;
+            font-size: 1.5rem;
+            margin-top: 5px;
+        }
+        h2 {
+            color: #3fb950;
             font-size: 1.2rem;
-            margin: 15px 0;
-            background: #2a2a2a;
+            margin-bottom: 10px;
+        }
+        .container {
+            background: #21262d;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            box-shadow: inset 0 1px 3px rgba(255,255,255,0.1);
+        }
+        .stats {
+            font-size: 1rem;
+            margin: 10px 0;
+            background: #30363d;
             padding: 10px;
-            border-radius: 5px;
+            border-radius: 8px;
         }
         button {
-            background-color: #4CAF50;
+            background-color: #238636;
             color: white;
             border: none;
-            padding: 12px 20px;
-            font-size: 1rem;
-            border-radius: 5px;
+            padding: 10px 15px;
+            font-size: 0.95rem;
+            border-radius: 6px;
             cursor: pointer;
-            margin: 5px;
+            margin: 5px 0;
+            width: 100%;
+            font-weight: bold;
             transition: background 0.2s;
         }
         button:hover {
-            background-color: #45a049;
+            background-color: #2ea043;
         }
         button:disabled {
-            background-color: #555;
+            background-color: #484f58;
             cursor: not-allowed;
+            color: #8b949e;
         }
-        .shop-item, .city-item {
+        .ad-button {
+            background-color: #8957e5;
+        }
+        .ad-button:hover {
+            background-color: #a371f7;
+        }
+        .shop-item {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #2c2c2c;
-            padding: 10px 15px;
-            margin: 10px 0;
-            border-radius: 5px;
+            flex-direction: column;
+            background: #30363d;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 8px;
+            text-align: right;
+        }
+        .shop-item span {
+            font-size: 0.9rem;
+            margin-bottom: 5px;
         }
         .hidden {
             display: none;
         }
         #message {
-            color: #ffeb3b;
+            color: #d29922;
+            font-size: 0.9rem;
             font-weight: bold;
-            height: 24px;
+            min-height: 35px;
             margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>עיר בחולות - סימולטור חיים</h1>
-        <div id="message">ברוך הבא! התחל לעבוד כדי להרוויח את השקל הראשון שלך.</div>
+    <div class="phone-frame">
+        <h1>Idle City Tycoon</h1>
+        <div id="message">Welcome! Start working to earn your first cash.</div>
         
-        <div class="stats">
-            <div>כסף: <span id="money">0</span> ₪</div>
-            <div>הכנסה לשנייה: <span id="cps">0</span> ₪/שנייה</div>
-            <div>סטטוס נוכחי: <span id="status">אזרח פשוט</span></div>
+        <div class="container stats">
+            <div>Cash: <strong>$<span id="money">0</span></strong></div>
+            <div>Income: <strong>$<span id="cps">0</span>/sec</strong></div>
+            <div>Status: <span id="status">Regular Citizen</span></div>
         </div>
 
-        <div id="work-section">
-            <button onclick="work()">עבוד קשה והרוויח כסף</button>
+        <!-- Working Section -->
+        <div class="container" id="work-section">
+            <button onclick="work()">Work Hard & Earn Cash</button>
         </div>
-    </div>
 
-    <!-- שלב 1: מציאת עבודה אצל מישהו -->
-    <div id="jobs-section" class="container hidden">
-        <h2>משרות בשוק</h2>
-        <div id="jobs-list"></div>
-    </div>
+        <!-- Ad Rewards Section -->
+        <div class="container">
+            <button class="ad-button" onclick="watchAd()">📺 Watch Ad for +$500 Cash</button>
+        </div>
 
-    <!-- שלב 2: קניית עסקים משלך -->
-    <div id="business-section" class="container hidden">
-        <h2>העסקים שלך</h2>
-        <div id="businesses-list"></div>
-    </div>
+        <!-- Jobs Section -->
+        <div id="jobs-section" class="container hidden">
+            <h2>Job Market</h2>
+            <div id="jobs-list"></div>
+        </div>
 
-    <!-- שלב 3: הקמת עיר משלך -->
-    <div id="city-section" class="container hidden">
-        <h2>העיר החדשה שלך ("נווה חדש")</h2>
-        <div id="city-list"></div>
+        <!-- Businesses Section -->
+        <div id="business-section" class="container hidden">
+            <h2>Your Businesses</h2>
+            <div id="businesses-list"></div>
+        </div>
+
+        <!-- City Section -->
+        <div id="city-section" class="container hidden">
+            <h2>Your City ("New Haven")</h2>
+            <div id="city-list"></div>
+        </div>
     </div>
 
     <script>
@@ -119,28 +158,27 @@
         };
 
         const jobs = [
-            { name: "שוטף כלים במסעדה", pay: 1, cost: 0, unlocked: true },
-            { name: "מוכר בחנות נוחות", pay: 5, cost: 100, unlocked: false },
-            { name: "מנהל משמרת", pay: 20, cost: 500, unlocked: false }
+            { name: "Restaurant Dishwasher", pay: 1, cost: 0, unlocked: true },
+            { name: "Convenience Store Clerk", pay: 5, cost: 100, unlocked: false },
+            { name: "Shift Manager", pay: 20, cost: 500, unlocked: false }
         ];
 
         const businessesData = {
-            kiosk: { name: "קיוסק שכונתי", cost: 1000, income: 10, count: 0 },
-            store: { name: "סופרמרקט", cost: 7500, income: 60, count: 0 },
-            factory: { name: "מפעל טכנולוגי", cost: 40000, income: 300, count: 0 }
+            kiosk: { name: "Neighborhood Kiosk", cost: 1000, income: 10 },
+            store: { name: "Supermarket", cost: 7500, income: 60 },
+            factory: { name: "Tech Factory", cost: 40000, income: 300 }
         };
 
         const cityData = {
-            houses: { name: "שכונת מגורים", cost: 100000, income: 1000, count: 0 },
-            park: { name: "פארק עירוני", cost: 500000, income: 5000, count: 0 },
-            skyscraper: { name: "מרכז מסחרי ענק", cost: 2500000, income: 25000, count: 0 }
+            houses: { name: "Residential Area", cost: 100000, income: 1000 },
+            park: { name: "City Park", cost: 500000, income: 5000 },
+            skyscraper: { name: "Mega Commercial Center", cost: 2500000, income: 25000 }
         };
 
         function updateUI() {
             document.getElementById('money').innerText = Math.floor(game.money).toLocaleString();
             document.getElementById('cps').innerText = game.cps.toLocaleString();
             
-            // עדכון חלקי המשחק לפי התקדמות
             if (game.money >= 50 || game.jobLevel > 0) {
                 document.getElementById('jobs-section').classList.remove('hidden');
                 renderJobs();
@@ -171,14 +209,23 @@
             updateUI();
         }
 
+        function watchAd() {
+            document.getElementById('message').innerText = "Simulating Ad... Enjoying your reward!";
+            setTimeout(() => {
+                game.money += 500;
+                document.getElementById('message').innerText = "Ad finished! You received +$500!";
+                updateUI();
+            }, 1000);
+        }
+
         function renderJobs() {
             let html = '';
             jobs.forEach((job, index) => {
                 if (game.money >= job.cost / 2 || index <= game.jobLevel) {
                     let isCurrent = game.jobLevel === index;
                     html += `<div class="shop-item">
-                        <span>${job.name} (שכר: ${job.pay} ₪ לקיליק)</span>
-                        <button ${isCurrent ? 'disabled' : ''} onclick="setJob(${index})">${isCurrent ? 'העבודה הנוכחית שלך' : 'התחל לעבוד'}</button>
+                        <span><b>${job.name}</b> (Pay: $${job.pay}/click)</span>
+                        <button ${isCurrent ? 'disabled' : ''} onclick="setJob(${index})">${isCurrent ? 'Current Job' : 'Work Here'}</button>
                     </div>`;
                 }
             });
@@ -187,7 +234,7 @@
 
         function setJob(index) {
             game.jobLevel = index;
-            document.getElementById('message').innerText = `עברת לעבוד בתור: ${jobs[index].name}!`;
+            document.getElementById('message').innerText = `Switched job to: ${jobs[index].name}!`;
             updateUI();
         }
 
@@ -196,8 +243,8 @@
             for (let key in businessesData) {
                 let biz = businessesData[key];
                 html += `<div class="shop-item">
-                    <span>${biz.name} (יש לך: ${game.businesses[key]})<br><small>עלות: ${biz.cost.toLocaleString()} ₪ | הכנסה: +${biz.income}/שנייה</small></span>
-                    <button onclick="buyBusiness('${key}')">קנה עסק</button>
+                    <span><b>${biz.name}</b> (Owned: ${game.businesses[key]})<br>Cost: $${biz.cost.toLocaleString()} | +${biz.income}/sec</span>
+                    <button onclick="buyBusiness('${key}')">Buy Business</button>
                 </div>`;
             }
             document.getElementById('businesses-list').innerHTML = html;
@@ -209,11 +256,11 @@
                 game.money -= biz.cost;
                 game.businesses[key]++;
                 game.cps += biz.income;
-                biz.cost = Math.floor(biz.cost * 1.15); // העלאת מחיר קלה
-                document.getElementById('message').innerText = `רכשת בהצלחה ${biz.name}! העסק החל לייצר הכנסה.`;
+                biz.cost = Math.floor(biz.cost * 1.15);
+                document.getElementById('message').innerText = `Successfully purchased ${biz.name}!`;
                 updateUI();
             } else {
-                document.getElementById('message').innerText = "אין לך מספיק כסף כדי לקנות עסק זה.";
+                document.getElementById('message').innerText = "Not enough cash for this business.";
             }
         }
 
@@ -222,8 +269,8 @@
             for (let key in cityData) {
                 let building = cityData[key];
                 html += `<div class="shop-item">
-                    <span>${building.name} (נבנו: ${game.cityBuildings[key]})<br><small>עלות: ${building.cost.toLocaleString()} ₪ | הכנסה: +${building.income}/שנייה</small></span>
-                    <button onclick="buyCityBuilding('${key}')">בנה</button>
+                    <span><b>${building.name}</b> (Built: ${game.cityBuildings[key]})<br>Cost: $${building.cost.toLocaleString()} | +${building.income}/sec</span>
+                    <button onclick="buyCityBuilding('${key}')">Build</button>
                 </div>`;
             }
             document.getElementById('city-list').innerHTML = html;
@@ -236,22 +283,21 @@
                 game.cityBuildings[key]++;
                 game.cps += building.income;
                 building.cost = Math.floor(building.cost * 1.2);
-                document.getElementById('message').innerText = `בנית חלק חדש בעיר שלך: ${building.name}! העיר גדלה.`;
+                document.getElementById('message').innerText = `Built new city block: ${building.name}!`;
                 updateUI();
             } else {
-                document.getElementById('message').innerText = "קניית נדל"ך עירוני דורשת הון גדול יותר!";
+                document.getElementById('message').innerText = "Urban real estate requires more capital!";
             }
         }
 
         function updateStatusText() {
-            let status = "אזרח פשוט";
-            if (totalCity() > 0) status = "ראש עיר ומייסד מטרופולין";
-            else if (totalBusinesses() > 0) status = "בעל עסקים ויזם";
-            else if (game.jobLevel > 0) status = "שכיר מתקדם";
+            let status = "Regular Citizen";
+            if (totalCity() > 0) status = "Mayor & Metropolis Founder";
+            else if (totalBusinesses() > 0) status = "Business Owner & Entrepreneur";
+            else if (game.jobLevel > 0) status = "Advanced Employee";
             document.getElementById('status').innerText = status;
         }
 
-        // לולאת הזמן של המשחק (רווחים אוטומטיים לשנייה)
         setInterval(() => {
             if (game.cps > 0) {
                 game.money += game.cps / 10;
