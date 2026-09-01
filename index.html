@@ -1,288 +1,1518 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Open World Idle City Tycoon</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #0d1117;
-            color: #c9d1d9;
-            margin: 0;
-            padding: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        .phone-frame {
-            width: 100%;
-            max-width: 420px;
-            background: #161b22;
-            padding: 15px;
-            border-radius: 35px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            border: 4px solid #30363d;
-            box-sizing: border-box;
-            text-align: center;
-        }
-        h1 {
-            color: #58a6ff;
-            font-size: 1.3rem;
-            margin: 5px 0;
-        }
-        .container {
-            background: #21262d;
-            padding: 12px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-        }
-        .stats {
-            font-size: 0.9rem;
-            background: #30363d;
-            padding: 8px;
-            border-radius: 6px;
-            display: flex;
-            justify-content: space-around;
-        }
-        /* Canvas Map View */
-        #gameMap {
-            background: #090d12;
-            border-radius: 8px;
-            border: 2px solid #30363d;
-            display: block;
-            margin: 0 auto 10px auto;
-        }
-        button {
-            background-color: #238636;
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            font-size: 0.85rem;
-            border-radius: 6px;
-            cursor: pointer;
-            margin: 3px;
-            font-weight: bold;
-        }
-        button:hover { background-color: #2ea043; }
-        button:disabled { background-color: #484f58; color: #8b949e; cursor: not-allowed; }
-        .controls-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 5px;
-            margin-top: 5px;
-        }
-        .controls-grid button { width: 100%; padding: 12px; font-size: 1.1rem; }
-        .empty-space { background: transparent; border: none; cursor: default; }
-        #message {
-            color: #d29922;
-            font-size: 0.85rem;
-            font-weight: bold;
-            min-height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .shop-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #30363d;
-            padding: 8px;
-            margin: 5px 0;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            text-align: left;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hotel Empire</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #101522;
+    color: white;
+    overflow-x: hidden;
+}
+
+button {
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 8px;
+    padding: 10px 14px;
+    transition: .15s;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.12);
+}
+
+button:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.topbar {
+    height: 70px;
+    background: #171d2b;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 25px;
+    border-bottom: 2px solid #293247;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: 900;
+}
+
+.money {
+    color: #55e878;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.main {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    min-height: calc(100vh - 70px);
+}
+
+.city {
+    position: relative;
+    min-height: calc(100vh - 70px);
+    padding: 25px;
+    background:
+        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px),
+        #1b2635;
+    background-size: 40px 40px;
+    overflow: hidden;
+}
+
+.city-title {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.city-title h1 {
+    margin: 0;
+}
+
+.city-title p {
+    color: #9da8bc;
+}
+
+.map {
+    max-width: 1000px;
+    min-height: 650px;
+    margin: auto;
+    background: #263646;
+    border: 5px solid #34475c;
+    border-radius: 20px;
+    padding: 25px;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,.35);
+}
+
+.road {
+    position: absolute;
+    background: #444d58;
+    z-index: 0;
+}
+
+.road.horizontal {
+    width: 100%;
+    height: 70px;
+    left: 0;
+    top: 48%;
+}
+
+.road.vertical {
+    height: 100%;
+    width: 70px;
+    top: 0;
+    left: 48%;
+}
+
+.building {
+    position: absolute;
+    width: 170px;
+    min-height: 130px;
+    background: #202a3a;
+    border: 3px solid #46556c;
+    border-radius: 14px;
+    padding: 15px;
+    z-index: 3;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,.25);
+}
+
+.building:hover {
+    border-color: #63a9ff;
+}
+
+.building .icon {
+    font-size: 40px;
+}
+
+.building h3 {
+    margin: 5px 0;
+}
+
+.building p {
+    margin: 3px;
+    color: #aeb8c9;
+    font-size: 13px;
+}
+
+.hotel {
+    width: 260px;
+    min-height: 190px;
+    left: 18px;
+    top: 25px;
+    background: linear-gradient(145deg,#3c2d56,#252e48);
+    border-color: #9a70dc;
+}
+
+.hotel .icon {
+    font-size: 55px;
+}
+
+.pizzeria {
+    left: 40px;
+    bottom: 30px;
+}
+
+.restaurant {
+    right: 40px;
+    bottom: 30px;
+}
+
+.parking {
+    right: 30px;
+    top: 35px;
+}
+
+.mall {
+    right: 220px;
+    top: 35px;
+}
+
+.locked {
+    opacity: .5;
+    filter: grayscale(1);
+}
+
+.empty-plot {
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+    width: 200px;
+    min-height: 130px;
+    background: #2d3b4a;
+    border: 3px dashed #607086;
+}
+
+.panel {
+    background: #141a27;
+    border-left: 2px solid #293247;
+    padding: 18px;
+    overflow-y: auto;
+    max-height: calc(100vh - 70px);
+}
+
+.panel-section {
+    background: #1b2332;
+    border: 1px solid #303b4f;
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 15px;
+}
+
+.panel-section h2,
+.panel-section h3 {
+    margin-top: 0;
+}
+
+.stat {
+    display: flex;
+    justify-content: space-between;
+    margin: 8px 0;
+    color: #bdc7d7;
+}
+
+.stat strong {
+    color: white;
+}
+
+.green {
+    color: #55e878;
+}
+
+.red {
+    color: #ff6868;
+}
+
+.gold {
+    color: #ffd35c;
+}
+
+.blue {
+    color: #6eb3ff;
+}
+
+.progress {
+    width: 100%;
+    height: 10px;
+    background: #30394a;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 8px 0;
+}
+
+.progress-bar {
+    height: 100%;
+    background: #63a9ff;
+    width: 0%;
+    transition: width .3s;
+}
+
+.action {
+    width: 100%;
+    margin-top: 8px;
+    background: #386ed8;
+    color: white;
+}
+
+.secondary {
+    background: #343f52;
+}
+
+.green-btn {
+    background: #2caa59;
+    color: white;
+}
+
+.gold-btn {
+    background: #b98320;
+    color: white;
+}
+
+.danger {
+    background: #a43c46;
+    color: white;
+}
+
+.build-list {
+    display: grid;
+    gap: 8px;
+}
+
+.build-item {
+    background: #242e40;
+    padding: 10px;
+    border-radius: 9px;
+    border: 1px solid #354158;
+}
+
+.build-item h4 {
+    margin: 0 0 5px;
+}
+
+.build-item p {
+    font-size: 12px;
+    color: #aab5c6;
+}
+
+.task {
+    padding: 9px;
+    border-radius: 8px;
+    background: #252f41;
+    margin: 7px 0;
+}
+
+.task.done {
+    opacity: .55;
+    text-decoration: line-through;
+}
+
+.notification {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    background: #202b3c;
+    border: 1px solid #51627b;
+    padding: 15px 20px;
+    border-radius: 10px;
+    z-index: 100;
+    box-shadow: 0 10px 30px rgba(0,0,0,.4);
+    display: none;
+}
+
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.72);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 90;
+    padding: 20px;
+}
+
+.modal-box {
+    width: 500px;
+    max-width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    background: #192131;
+    border: 2px solid #3d4d65;
+    border-radius: 15px;
+    padding: 22px;
+}
+
+.close {
+    float: right;
+    background: #3a4659;
+    color: white;
+}
+
+.worker {
+    background: #242f41;
+    padding: 12px;
+    border-radius: 9px;
+    margin: 8px 0;
+}
+
+.badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 20px;
+    background: #34445c;
+    color: #c9d5e8;
+    font-size: 11px;
+}
+
+@media(max-width: 900px) {
+    .main {
+        grid-template-columns: 1fr;
+    }
+
+    .panel {
+        max-height: none;
+        border-left: none;
+        border-top: 2px solid #293247;
+    }
+
+    .city {
+        min-height: 700px;
+    }
+}
+
+@media(max-width: 600px) {
+    .topbar {
+        padding: 0 12px;
+    }
+
+    .logo {
+        font-size: 18px;
+    }
+
+    .money {
+        font-size: 16px;
+    }
+
+    .map {
+        transform: scale(.85);
+        transform-origin: top center;
+        width: 650px;
+        margin-left: -80px;
+    }
+}
+</style>
 </head>
+
 <body>
 
-    <div class="phone-frame">
-        <h1>Open World City Tycoon</h1>
-        <div id="message">Use Joystick/Arrows to explore the city & enter buildings!</div>
-        
-        <div class="container stats">
-            <div>Cash: <b>$<span id="money">0</span></b></div>
-            <div>Income: <b>$<span id="cps">0</span>/s</b></div>
-            <div>Vehicle: <span id="vehicle-name">Walking</span></div>
+<div class="topbar">
+    <div class="logo">🏨 HOTEL EMPIRE</div>
+    <div>
+        <span id="money" class="money">$100</span>
+    </div>
+</div>
+
+<div class="main">
+
+<div class="city">
+
+    <div class="city-title">
+        <h1 id="hotelName">Your Small Hotel</h1>
+        <p>
+            <span id="timeText">Morning</span>
+            •
+            <span id="weatherText">Sunny</span>
+            •
+            ⭐ <span id="reputationText">1.0</span>
+        </p>
+    </div>
+
+    <div class="map">
+
+        <div class="road horizontal"></div>
+        <div class="road vertical"></div>
+
+        <div class="building hotel" onclick="openHotel()">
+            <div class="icon">🏨</div>
+            <h3>Hotel</h3>
+            <p><span id="roomsText">5</span> rooms</p>
+            <p>Click to manage</p>
         </div>
 
-        <!-- Canvas for Game World -->
-        <canvas id="gameMap" width="380" height="200"></canvas>
-
-        <!-- Movement Controls for Mobile -->
-        <div class="container">
-            <div class="controls-grid">
-                <div class="empty-space"></div>
-                <button onclick="movePlayer(0, -1)">⬆️</button>
-                <div class="empty-space"></div>
-                <button onclick="movePlayer(-1, 0)">⬅️</button>
-                <button onclick="interact()">⭐ Action</button>
-                <button onclick="movePlayer(1, 0)">➡️</button>
-                <div class="empty-space"></div>
-                <button onclick="movePlayer(0, 1)">⬇️</button>
-                <div class="empty-space"></div>
-            </div>
+        <div class="building pizzeria locked" id="pizzeriaBuilding">
+            <div class="icon">🍕</div>
+            <h3>Pizzeria</h3>
+            <p id="pizzeriaStatus">Locked</p>
         </div>
 
-        <!-- Dynamic Interaction Panel -->
-        <div id="action-panel" class="container">
-            <h3 id="panel-title" style="margin: 5px 0; color: #58a6ff; font-size: 1rem;">Explore the Map</h3>
-            <div id="panel-content">Walk to locations like the Pier, Office, Car Wash, or Car Shop!</div>
+        <div class="building restaurant locked" id="restaurantBuilding">
+            <div class="icon">🍽️</div>
+            <h3>Restaurant</h3>
+            <p id="restaurantStatus">Locked</p>
         </div>
 
-        <!-- Business & Empire Panel -->
-        <div class="container">
-            <h3 style="margin: 5px 0; color: #3fb950; font-size: 1rem;">Empire & Transport</h3>
-            <div id="empire-list"></div>
+        <div class="building parking locked" id="parkingBuilding">
+            <div class="icon">🚗</div>
+            <h3>Parking</h3>
+            <p id="parkingStatus">Locked</p>
+        </div>
+
+        <div class="building mall locked" id="mallBuilding">
+            <div class="icon">🛍️</div>
+            <h3>Shopping Mall</h3>
+            <p id="mallStatus">Locked</p>
+        </div>
+
+        <div class="building empty-plot">
+            <div class="icon">🏗️</div>
+            <h3>Expansion Plot</h3>
+            <p>Build something new</p>
+        </div>
+
+    </div>
+</div>
+
+<div class="panel">
+
+    <div class="panel-section">
+        <h2>📊 Management</h2>
+
+        <div class="stat">
+            <span>Cash</span>
+            <strong id="cashStat">$100</strong>
+        </div>
+
+        <div class="stat">
+            <span>Income / min</span>
+            <strong class="green" id="incomeStat">$0</strong>
+        </div>
+
+        <div class="stat">
+            <span>Expenses / min</span>
+            <strong class="red" id="expenseStat">$0</strong>
+        </div>
+
+        <div class="stat">
+            <span>Profit / min</span>
+            <strong id="profitStat">$0</strong>
+        </div>
+
+        <div class="stat">
+            <span>Guests</span>
+            <strong id="guestStat">0</strong>
+        </div>
+
+        <div class="stat">
+            <span>Reputation</span>
+            <strong class="gold" id="repStat">⭐ 1.0</strong>
         </div>
     </div>
 
-    <script>
-        let game = {
-            money: 10,
-            cps: 0,
-            x: 5,
-            y: 5,
-            speed: 1,
-            vehicle: 'walking', // walking, bike, car
-            businesses: { kiosk: 0, factory: 0 },
-            properties: { newTown: 0 }
-        };
+    <div class="panel-section">
+        <h3>👤 Work Yourself</h3>
+        <p style="color:#aeb8c9;font-size:13px;">
+            You are the only employee. Work manually until you can afford help.
+        </p>
 
-        // Map layout elements (Grid 10x10)
-        // Locations: 0=Road, 1=Pier (Fisherman), 2=Office, 3=CarWash, 4=CarShop, 5=RealEstate
-        const locations = {
-            "1,1": { name: "Ocean Pier (Fisherman Job)", type: "job", jobName: "Fisherman", pay: 2, desc: "Catch fish for cash!" },
-            "8,2": { name: "Corporate Office", type: "job", jobName: "Office Worker", pay: 6, desc: "Paperwork and spreadsheets." },
-            "2,8": { name: "City Car Wash", type: "job", jobName: "Car Cleaner", pay: 10, desc: "Wash vehicles to earn money." },
-            "8,8": { name: "Vehicle Dealership", type: "shop", item: "car", cost: 500, desc: "Buy a Car to move faster!" },
-            "5,5": { name: "New Town Construction", type: "city", item: "newTown", cost: 5000, desc: "Build your own satellite city!" }
-        };
+        <button class="action green-btn" onclick="work()">
+            🧹 Clean / Serve Guest +$10
+        </button>
 
-        const canvas = document.getElementById("gameMap");
-        const ctx = canvas.getContext("2d");
+        <button class="action secondary" onclick="checkInGuest()">
+            🛎️ Check In Guest
+        </button>
+    </div>
 
-        function drawMap() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            let tileSize = 38;
+    <div class="panel-section">
+        <h3>🏗️ Build & Expand</h3>
 
-            // Draw grid and spots
-            for (let rx = 0; rx < 10; rx++) {
-                for (let ry = 0; ry < 10; ry++) {
-                    ctx.fillStyle = "#161b22";
-                    ctx.fillRect(rx * tileSize + 2, ry * tileSize + 2, tileSize - 4, tileSize - 4);
+        <div class="build-list">
 
-                    let key = `${rx},${ry}`;
-                    if (locations[key]) {
-                        ctx.fillStyle = locations[key].type === 'job' ? '#1f6feb' : (locations[key].type === 'shop' ? '#8957e5' : '#f85149');
-                        ctx.fillRect(rx * tileSize + 6, ry * tileSize + 6, tileSize - 12, tileSize - 12);
-                    }
-                }
-            }
+            <div class="build-item">
+                <h4>🛏️ Add 5 Rooms</h4>
+                <p>More rooms = more guests and higher income.</p>
+                <button class="action" onclick="build('rooms')">
+                    Build for $500
+                </button>
+            </div>
 
-            // Draw Player
-            ctx.fillStyle = "#3fb950";
-            ctx.beginPath();
-            ctx.arc(game.x * tileSize + 19, game.y * tileSize + 19, 10, 0, Math.PI * 2);
-            ctx.fill();
+            <div class="build-item">
+                <h4>🚗 Parking</h4>
+                <p>Guests pay for parking.</p>
+                <button class="action" onclick="build('parking')">
+                    Build for $2,000
+                </button>
+            </div>
+
+            <div class="build-item">
+                <h4>🍕 Pizzeria</h4>
+                <p>Serve pizza to guests and city residents.</p>
+                <button class="action" onclick="build('pizzeria')">
+                    Build for $5,000
+                </button>
+            </div>
+
+            <div class="build-item">
+                <h4>🍽️ Restaurant</h4>
+                <p>A full restaurant increases your reputation.</p>
+                <button class="action" onclick="build('restaurant')">
+                    Build for $15,000
+                </button>
+            </div>
+
+            <div class="build-item">
+                <h4>👨‍🍳 Chef Restaurant</h4>
+                <p>Luxury dining for VIP guests.</p>
+                <button class="action" onclick="build('chef')">
+                    Build for $50,000
+                </button>
+            </div>
+
+            <div class="build-item">
+                <h4>🛍️ Shopping Mall</h4>
+                <p>A huge source of passive income.</p>
+                <button class="action" onclick="build('mall')">
+                    Build for $100,000
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="panel-section">
+        <h3>👷 Employees</h3>
+
+        <div id="workers">
+            <p style="color:#8995aa;">
+                You don't have any employees yet.
+            </p>
+        </div>
+
+        <button class="action gold-btn" onclick="hire('cleaner')">
+            Hire Cleaner — $1,000
+        </button>
+
+        <button class="action gold-btn" onclick="hire('receptionist')">
+            Hire Receptionist — $2,500
+        </button>
+
+        <button class="action gold-btn" onclick="hire('chef')">
+            Hire Chef — $5,000
+        </button>
+
+        <button class="action gold-btn" onclick="hire('manager')">
+            Hire Manager — $15,000
+        </button>
+    </div>
+
+    <div class="panel-section">
+        <h3>🎯 Missions</h3>
+        <div id="missions"></div>
+    </div>
+
+    <div class="panel-section">
+        <h3>🏆 Achievements</h3>
+        <div id="achievements"></div>
+    </div>
+
+    <div class="panel-section">
+        <h3>♻️ Prestige</h3>
+        <p style="font-size:13px;color:#aeb8c9;">
+            Reach $1,000,000 to sell your empire and start again
+            with a permanent income bonus.
+        </p>
+
+        <div class="stat">
+            <span>Prestige Level</span>
+            <strong id="prestigeText">0</strong>
+        </div>
+
+        <button class="action" onclick="prestige()">
+            Start New Empire
+        </button>
+    </div>
+
+    <div class="panel-section">
+        <button class="action secondary" onclick="saveGame()">
+            💾 Save Game
+        </button>
+
+        <button class="action danger" onclick="resetGame()">
+            Reset Game
+        </button>
+    </div>
+
+</div>
+</div>
+
+<div class="notification" id="notification"></div>
+
+<div class="modal" id="hotelModal">
+    <div class="modal-box">
+
+        <button class="close" onclick="closeHotel()">X</button>
+
+        <h2>🏨 Hotel Management</h2>
+
+        <div class="stat">
+            <span>Total Rooms</span>
+            <strong id="modalRooms">5</strong>
+        </div>
+
+        <div class="stat">
+            <span>Room Price</span>
+            <strong id="modalPrice">$50</strong>
+        </div>
+
+        <div class="stat">
+            <span>Occupied Rooms</span>
+            <strong id="modalOccupied">0</strong>
+        </div>
+
+        <hr style="border-color:#303b4f">
+
+        <h3>💰 Room Pricing</h3>
+
+        <p style="color:#aeb8c9;font-size:13px;">
+            Higher prices increase income but can reduce guest demand.
+        </p>
+
+        <button class="action" onclick="changePrice(-5)">
+            - $5
+        </button>
+
+        <button class="action" onclick="changePrice(5)">
+            + $5
+        </button>
+
+        <h3 style="margin-top:20px;">⬆️ Hotel Upgrades</h3>
+
+        <button class="action" onclick="upgradeHotel()">
+            Upgrade Hotel — $2,500
+        </button>
+
+        <p id="hotelLevelText"></p>
+
+    </div>
+</div>
+
+<script>
+
+let game = {
+    money: 100,
+    rooms: 5,
+    roomPrice: 50,
+    occupied: 0,
+    reputation: 1,
+    guests: 0,
+    income: 0,
+    expenses: 0,
+    hotelLevel: 1,
+    prestige: 0,
+
+    buildings: {
+        parking: false,
+        pizzeria: false,
+        restaurant: false,
+        chef: false,
+        mall: false
+    },
+
+    workers: [],
+
+    stats: {
+        work: 0,
+        guestsServed: 0,
+        moneyEarned: 0,
+        roomsBuilt: 0,
+        buildingsBuilt: 0
+    },
+
+    achievements: []
+};
+
+const missions = [
+    {
+        id:"work10",
+        text:"Work 10 times",
+        target:10,
+        type:"work",
+        reward:250
+    },
+    {
+        id:"guest10",
+        text:"Serve 10 guests",
+        target:10,
+        type:"guestsServed",
+        reward:500
+    },
+    {
+        id:"money5000",
+        text:"Earn $5,000",
+        target:5000,
+        type:"moneyEarned",
+        reward:1000
+    },
+    {
+        id:"rooms20",
+        text:"Build 20 rooms",
+        target:20,
+        type:"roomsBuilt",
+        reward:2000
+    },
+    {
+        id:"business",
+        text:"Build your first business",
+        target:1,
+        type:"buildingsBuilt",
+        reward:3000
+    }
+];
+
+const achievementList = [
+    {
+        id:"firstMoney",
+        text:"Make your first $100",
+        check:()=>game.stats.moneyEarned >= 100
+    },
+    {
+        id:"firstWorker",
+        text:"Hire your first employee",
+        check:()=>game.workers.length >= 1
+    },
+    {
+        id:"tenRooms",
+        text:"Own 10 rooms",
+        check:()=>game.rooms >= 10
+    },
+    {
+        id:"fiveStar",
+        text:"Reach 5 star reputation",
+        check:()=>game.reputation >= 5
+    },
+    {
+        id:"millionaire",
+        text:"Have $1,000,000",
+        check:()=>game.money >= 1000000
+    },
+    {
+        id:"empire",
+        text:"Build the Shopping Mall",
+        check:()=>game.buildings.mall
+    }
+];
+
+function formatMoney(n) {
+    if (n >= 1000000000)
+        return "$" + (n/1000000000).toFixed(2) + "B";
+
+    if (n >= 1000000)
+        return "$" + (n/1000000).toFixed(2) + "M";
+
+    if (n >= 1000)
+        return "$" + (n/1000).toFixed(1) + "K";
+
+    return "$" + Math.floor(n);
+}
+
+function notify(text) {
+    const box = document.getElementById("notification");
+
+    box.innerText = text;
+    box.style.display = "block";
+
+    setTimeout(()=>{
+        box.style.display = "none";
+    },3000);
+}
+
+function addMoney(amount) {
+    game.money += amount;
+
+    if(amount > 0) {
+        game.stats.moneyEarned += amount;
+    }
+
+    update();
+}
+
+function work() {
+    addMoney(10);
+
+    game.stats.work++;
+
+    if(game.stats.work % 5 === 0) {
+        game.reputation = Math.min(5,game.reputation + .05);
+    }
+
+    notify("💵 You worked and earned $10!");
+}
+
+function checkInGuest() {
+
+    if(game.occupied >= game.rooms) {
+        notify("❌ No available rooms!");
+        return;
+    }
+
+    game.occupied++;
+    game.guests++;
+    game.stats.guestsServed++;
+
+    addMoney(game.roomPrice);
+
+    notify("🛎️ Guest checked in! +" + formatMoney(game.roomPrice));
+
+    setTimeout(()=>{
+        if(game.occupied > 0) {
+            game.occupied--;
+
+            game.reputation = Math.min(
+                5,
+                game.reputation + .01
+            );
         }
 
-        function movePlayer(dx, dy) {
-            let newX = game.x + (dx * game.speed);
-            let newY = game.y + (dy * game.speed);
-            if (newX >= 0 && newX < 10 && newY >= 0 && newY < 10) {
-                game.x = newX;
-                game.y = newY;
-                checkLocation();
-                drawMap();
+        update();
+
+    },15000);
+}
+
+function build(type) {
+
+    const prices = {
+        rooms:500,
+        parking:2000,
+        pizzeria:5000,
+        restaurant:15000,
+        chef:50000,
+        mall:100000
+    };
+
+    const price = prices[type];
+
+    if(game.money < price) {
+        notify("❌ You need " + formatMoney(price-game.money) + " more.");
+        return;
+    }
+
+    if(type !== "rooms" && game.buildings[type]) {
+        notify("Already built!");
+        return;
+    }
+
+    game.money -= price;
+
+    if(type === "rooms") {
+        game.rooms += 5;
+        game.stats.roomsBuilt += 5;
+
+        notify("🏗️ 5 new rooms have been built!");
+    }
+    else {
+        game.buildings[type] = true;
+        game.stats.buildingsBuilt++;
+
+        game.reputation = Math.min(5, game.reputation + .25);
+
+        notify("🏗️ New building completed!");
+    }
+
+    update();
+}
+
+function hire(type) {
+
+    const data = {
+        cleaner:{
+            name:"Cleaner",
+            salary:100,
+            speed:1
+        },
+        receptionist:{
+            name:"Receptionist",
+            salary:250,
+            speed:1.5
+        },
+        chef:{
+            name:"Chef",
+            salary:400,
+            speed:2
+        },
+        manager:{
+            name:"Manager",
+            salary:750,
+            speed:3
+        }
+    };
+
+    const d = data[type];
+
+    const cost = {
+        cleaner:1000,
+        receptionist:2500,
+        chef:5000,
+        manager:15000
+    }[type];
+
+    if(game.money < cost) {
+        notify("❌ Not enough money!");
+        return;
+    }
+
+    game.money -= cost;
+
+    game.workers.push({
+        type:type,
+        name:d.name,
+        level:1,
+        salary:d.salary,
+        speed:d.speed
+    });
+
+    notify("👷 You hired a " + d.name + "!");
+
+    update();
+}
+
+function upgradeWorker(index) {
+
+    const worker = game.workers[index];
+
+    const cost = 1000 * worker.level;
+
+    if(game.money < cost) {
+        notify("❌ Not enough money!");
+        return;
+    }
+
+    game.money -= cost;
+
+    worker.level++;
+    worker.salary += 50;
+
+    notify("⬆️ " + worker.name + " upgraded to Level " + worker.level);
+
+    update();
+}
+
+function upgradeHotel() {
+
+    const cost = 2500 * game.hotelLevel;
+
+    if(game.money < cost) {
+        notify("❌ You need " + formatMoney(cost) + ".");
+        return;
+    }
+
+    game.money -= cost;
+    game.hotelLevel++;
+
+    game.reputation = Math.min(5,game.reputation + .2);
+
+    notify("🏨 Hotel upgraded to Level " + game.hotelLevel);
+
+    update();
+}
+
+function changePrice(amount) {
+
+    game.roomPrice += amount;
+
+    if(game.roomPrice < 20)
+        game.roomPrice = 20;
+
+    if(game.roomPrice > 500)
+        game.roomPrice = 500;
+
+    update();
+}
+
+function openHotel() {
+    document.getElementById("hotelModal").style.display = "flex";
+    update();
+}
+
+function closeHotel() {
+    document.getElementById("hotelModal").style.display = "none";
+}
+
+function calculateIncome() {
+
+    let income = 0;
+
+    income += game.rooms * (game.roomPrice / 60);
+
+    if(game.buildings.parking)
+        income += 15;
+
+    if(game.buildings.pizzeria)
+        income += 25;
+
+    if(game.buildings.restaurant)
+        income += 80;
+
+    if(game.buildings.chef)
+        income += 300;
+
+    if(game.buildings.mall)
+        income += 750;
+
+    const prestigeBonus = 1 + game.prestige * .1;
+
+    return income * prestigeBonus;
+}
+
+function calculateExpenses() {
+
+    let expenses = 0;
+
+    game.workers.forEach(worker=>{
+        expenses += worker.salary;
+    });
+
+    return expenses;
+}
+
+function updateWorkers() {
+
+    const container = document.getElementById("workers");
+
+    if(game.workers.length === 0) {
+        container.innerHTML = `
+        <p style="color:#8995aa;">
+        You don't have any employees yet.
+        </p>`;
+        return;
+    }
+
+    container.innerHTML = "";
+
+    game.workers.forEach((worker,index)=>{
+
+        const div = document.createElement("div");
+
+        div.className = "worker";
+
+        div.innerHTML = `
+            <strong>${worker.name}</strong>
+            <span class="badge">Level ${worker.level}</span>
+
+            <div style="font-size:12px;color:#aeb8c9;margin-top:6px;">
+                Salary: ${formatMoney(worker.salary)}/min
+            </div>
+
+            <button
+                class="action"
+                onclick="upgradeWorker(${index})">
+                Upgrade — ${formatMoney(1000 * worker.level)}
+            </button>
+        `;
+
+        container.appendChild(div);
+    });
+}
+
+function updateMissions() {
+
+    const container = document.getElementById("missions");
+
+    container.innerHTML = "";
+
+    missions.forEach(m=>{
+
+        const current = game.stats[m.type] || 0;
+
+        const completed = current >= m.target;
+
+        const div = document.createElement("div");
+
+        div.className = "task " + (completed ? "done" : "");
+
+        div.innerHTML = `
+            <strong>${completed ? "✅" : "🎯"} ${m.text}</strong>
+            <div style="font-size:12px;color:#9da8bc;margin-top:4px;">
+                ${Math.min(current,m.target)} / ${m.target}
+            </div>
+
+            <div class="progress">
+                <div class="progress-bar"
+                    style="width:${Math.min(100,current/m.target*100)}%">
+                </div>
+            </div>
+
+            ${
+                completed
+                ?
+                `<span class="green">Reward claimed</span>`
+                :
+                `<span class="gold">Reward: ${formatMoney(m.reward)}</span>`
             }
+        `;
+
+        if(completed && !game.achievements.includes("mission_"+m.id)) {
+
+            game.achievements.push("mission_"+m.id);
+
+            game.money += m.reward;
+
+            notify("🎯 Mission complete! +" + formatMoney(m.reward));
         }
 
-        // Keyboard controls support
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowUp' || e.key === 'w') movePlayer(0, -1);
-            if (e.key === 'ArrowDown' || e.key === 's') movePlayer(0, 1);
-            if (e.key === 'ArrowLeft' || e.key === 'a') movePlayer(-1, 0);
-            if (e.key === 'ArrowRight' || e.key === 'd') movePlayer(1, 0);
-            if (e.key === 'e' || e.key === 'Enter') interact();
-        });
+        container.appendChild(div);
+    });
+}
 
-        function checkLocation() {
-            let key = `${game.x},${game.y}`;
-            let panelTitle = document.getElementById('panel-title');
-            let panelContent = document.getElementById('panel-content');
+function updateAchievements() {
 
-            if (locations[key]) {
-                let loc = locations[key];
-                panelTitle.innerText = loc.name;
-                panelContent.innerHTML = `${loc.desc}<br><button onclick="interact()">Interact / Work</button>`;
-            } else {
-                panelTitle.innerText = "Streets of Open City";
-                panelContent.innerHTML = "Explore the map to find Jobs, Car Shops, and City Building zones!";
-            }
+    const container = document.getElementById("achievements");
+
+    container.innerHTML = "";
+
+    achievementList.forEach(a=>{
+
+        const done = game.achievements.includes(a.id);
+
+        if(!done && a.check()) {
+            game.achievements.push(a.id);
+            notify("🏆 Achievement unlocked: " + a.text);
         }
 
-        function interact() {
-            let key = `${game.x},${game.y}`;
-            let loc = locations[key];
-            if (!loc) {
-                document.getElementById('message').innerText = "Nothing to do here. Walk to colored blocks!";
-                return;
-            }
+        const div = document.createElement("div");
 
-            if (loc.type === 'job') {
-                game.money += loc.pay;
-                document.getElementById('message').innerText = `Worked as ${loc.jobName}! Earned +$${loc.pay}`;
-                updateUI();
-            } else if (loc.type === 'shop' && loc.item === 'car') {
-                if (game.money >= loc.cost && game.vehicle === 'walking') {
-                    game.money -= loc.cost;
-                    game.vehicle = 'car';
-                    game.speed = 2; // Move faster!
-                    document.getElementById('vehicle-name').innerText = "Sports Car";
-                    document.getElementById('message').innerText = "Purchased a Car! You now move 2 blocks at a time.";
-                    updateUI();
-                } else {
-                    document.getElementById('message').innerText = "Already bought or not enough cash ($500 needed)!";
-                }
-            } else if (loc.type === 'city') {
-                if (game.money >= loc.cost) {
-                    game.money -= loc.cost;
-                    game.properties.newTown++;
-                    game.cps += 50;
-                    loc.cost = Math.floor(loc.cost * 1.5);
-                    document.getElementById('message').innerText = "Built a district in your new city! +$50/sec";
-                    updateUI();
-                } else {
-                    document.getElementById('message').innerText = "Building a city requires $5,000!";
-                }
-            }
+        div.className = "task " + (done ? "done" : "");
+
+        div.innerHTML =
+            `${done ? "🏆" : "🔒"} ${a.text}`;
+
+        container.appendChild(div);
+    });
+}
+
+function updateBuildings() {
+
+    const data = [
+        ["pizzeria","pizzeriaBuilding","pizzeriaStatus"],
+        ["restaurant","restaurantBuilding","restaurantStatus"],
+        ["parking","parkingBuilding","parkingStatus"],
+        ["mall","mallBuilding","mallStatus"]
+    ];
+
+    data.forEach(x=>{
+
+        const building = document.getElementById(x[1]);
+        const status = document.getElementById(x[2]);
+
+        if(game.buildings[x[0]]) {
+
+            building.classList.remove("locked");
+            status.innerText = "Open";
+        }
+        else {
+            building.classList.add("locked");
+            status.innerText = "Locked";
+        }
+    });
+}
+
+function update() {
+
+    const income = calculateIncome();
+    const expenses = calculateExpenses();
+    const profit = income - expenses;
+
+    document.getElementById("money").innerText =
+        formatMoney(game.money);
+
+    document.getElementById("cashStat").innerText =
+        formatMoney(game.money);
+
+    document.getElementById("incomeStat").innerText =
+        formatMoney(income);
+
+    document.getElementById("expenseStat").innerText =
+        formatMoney(expenses);
+
+    document.getElementById("profitStat").innerText =
+        formatMoney(profit);
+
+    document.getElementById("guestStat").innerText =
+        game.guests;
+
+    document.getElementById("repStat").innerText =
+        "⭐ " + game.reputation.toFixed(1);
+
+    document.getElementById("reputationText").innerText =
+        game.reputation.toFixed(1);
+
+    document.getElementById("roomsText").innerText =
+        game.rooms;
+
+    document.getElementById("modalRooms").innerText =
+        game.rooms;
+
+    document.getElementById("modalPrice").innerText =
+        formatMoney(game.roomPrice);
+
+    document.getElementById("modalOccupied").innerText =
+        game.occupied;
+
+    document.getElementById("hotelLevelText").innerText =
+        "Hotel Level: " + game.hotelLevel;
+
+    document.getElementById("prestigeText").innerText =
+        game.prestige;
+
+    updateWorkers();
+    updateMissions();
+    updateAchievements();
+    updateBuildings();
+}
+
+function gameTick() {
+
+    const income = calculateIncome();
+    const expenses = calculateExpenses();
+
+    const profit = income - expenses;
+
+    game.money += profit / 60;
+
+    if(game.money < 0)
+        game.money = 0;
+
+    // Automatic guests
+    if(Math.random() < 0.04 && game.occupied < game.rooms) {
+        game.occupied++;
+        game.guests++;
+        game.stats.guestsServed++;
+    }
+
+    // Guests leave
+    if(Math.random() < 0.03 && game.occupied > 0) {
+        game.occupied--;
+
+        if(Math.random() < .8)
+            game.reputation = Math.min(5,game.reputation + .005);
+    }
+
+    // Worker efficiency
+    if(game.workers.length > 0) {
+        game.reputation = Math.min(
+            5,
+            game.reputation + 0.001 * game.workers.length
+        );
+    }
+
+    update();
+}
+
+function randomEvent() {
+
+    const events = [
+
+        {
+            text:"🎉 A tourist group arrived! You earned a bonus.",
+            money:500
+        },
+
+        {
+            text:"⭐ A VIP guest loved your hotel!",
+            money:1000,
+            rep:.1
+        },
+
+        {
+            text:"🔧 Elevator broke. Repairs cost money.",
+            money:-300
+        },
+
+        {
+            text:"🍕 Food festival! Your restaurants are packed.",
+            money:1500
+        },
+
+        {
+            text:"🌧️ Heavy rain brought customers inside.",
+            money:700
+        },
+
+        {
+            text:"💼 A business conference booked your hotel!",
+            money:3000,
+            rep:.15
         }
 
-        function updateUI() {
-            document.getElementById('money').innerText = Math.floor(game.money).toLocaleString();
-            document.getElementById('cps').innerText = game.cps.toLocaleString();
-            
-            let empireHTML = `<div class="shop-row"><span>New Town Districts: ${game.properties.newTown}</span><span>+$50/s</span></div>`;
-            if (game.vehicle === 'car') {
-                empireHTML += `<div class="shop-row"><span>Transport: Sports Car</span><span>Active</span></div>`;
-            }
-            document.getElementById('empire-list').innerHTML = empireHTML;
-        }
+    ];
 
-        // Idle income tick
-        setInterval(() => {
-            if (game.cps > 0) {
-                game.money += game.cps / 10;
-                updateUI();
-            }
-        }, 100);
+    const event =
+        events[Math.floor(Math.random()*events.length)];
 
-        drawMap();
-        updateUI();
-    </script>
+    addMoney(event.money);
+
+    if(event.rep)
+        game.reputation =
+            Math.min(5,game.reputation + event.rep);
+
+    notify(event.text);
+}
+
+function updateTime() {
+
+    const hour = new Date().getHours();
+
+    let time = "Morning";
+
+    if(hour >= 12 && hour < 18)
+        time = "Afternoon";
+
+    if(hour >= 18 && hour < 23)
+        time = "Evening";
+
+    if(hour >= 23 || hour < 6)
+        time = "Night";
+
+    document.getElementById("timeText").innerText = time;
+
+    const weather = [
+        "Sunny ☀️",
+        "Cloudy ☁️",
+        "Rainy 🌧️",
+        "Windy 🌬️"
+    ];
+
+    const index =
+        Math.floor(Date.now()/60000) % weather.length;
+
+    document.getElementById("weatherText").innerText =
+        weather[index];
+}
+
+function prestige() {
+
+    if(game.money < 1000000) {
+        notify("❌ You need $1,000,000 to Prestige.");
+        return;
+    }
+
+    if(!confirm(
+        "Sell your empire and start a new one?\n\n" +
+        "You will receive +1 permanent income bonus."
+    ))
+        return;
+
+    game.money = 100;
+    game.rooms = 5;
+    game.roomPrice = 50;
+    game.occupied = 0;
+    game.guests = 0;
+    game.reputation = 1;
+    game.hotelLevel = 1;
+
+    game.buildings = {
+        parking:false,
+        pizzeria:false,
+        restaurant:false,
+        chef:false,
+        mall:false
+    };
+
+    game.workers = [];
+
+    game.stats = {
+        work:0,
+        guestsServed:0,
+        moneyEarned:0,
+        roomsBuilt:0,
+        buildingsBuilt:0
+    };
+
+    game.prestige++;
+
+    notify(
+        "♻️ New Empire started! Permanent income bonus: +" +
+        (game.prestige*10) + "%"
+    );
+
+    saveGame();
+    update();
+}
+
+function saveGame() {
+
+    localStorage.setItem(
+        "hotelEmpireSave",
+        JSON.stringify(game)
+    );
+
+    notify("💾 Game saved!");
+}
+
+function loadGame() {
+
+    const save =
+        localStorage.getItem("hotelEmpireSave");
+
+    if(!save)
+        return;
+
+    try {
+        game = JSON.parse(save);
+    }
+    catch(e) {
+        console.log("Save error");
+    }
+}
+
+function resetGame() {
+
+    if(!confirm("Delete your entire Hotel Empire save?"))
+        return;
+
+    localStorage.removeItem("hotelEmpireSave");
+
+    location.reload();
+}
+
+setInterval(gameTick,1000);
+
+setInterval(updateTime,1000);
+
+setInterval(saveGame,15000);
+
+setInterval(randomEvent,90000);
+
+loadGame();
+
+update();
+
+updateTime();
+
+</script>
+
 </body>
 </html>
+```
