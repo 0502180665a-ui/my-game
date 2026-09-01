@@ -1,1 +1,265 @@
 
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>עיר בחולות - משחק אידל</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1, h2 {
+            color: #4CAF50;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .stats {
+            font-size: 1.2rem;
+            margin: 15px 0;
+            background: #2a2a2a;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+        .shop-item, .city-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #2c2c2c;
+            padding: 10px 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .hidden {
+            display: none;
+        }
+        #message {
+            color: #ffeb3b;
+            font-weight: bold;
+            height: 24px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>עיר בחולות - סימולטור חיים</h1>
+        <div id="message">ברוך הבא! התחל לעבוד כדי להרוויח את השקל הראשון שלך.</div>
+        
+        <div class="stats">
+            <div>כסף: <span id="money">0</span> ₪</div>
+            <div>הכנסה לשנייה: <span id="cps">0</span> ₪/שנייה</div>
+            <div>סטטוס נוכחי: <span id="status">אזרח פשוט</span></div>
+        </div>
+
+        <div id="work-section">
+            <button onclick="work()">עבוד קשה והרוויח כסף</button>
+        </div>
+    </div>
+
+    <!-- שלב 1: מציאת עבודה אצל מישהו -->
+    <div id="jobs-section" class="container hidden">
+        <h2>משרות בשוק</h2>
+        <div id="jobs-list"></div>
+    </div>
+
+    <!-- שלב 2: קניית עסקים משלך -->
+    <div id="business-section" class="container hidden">
+        <h2>העסקים שלך</h2>
+        <div id="businesses-list"></div>
+    </div>
+
+    <!-- שלב 3: הקמת עיר משלך -->
+    <div id="city-section" class="container hidden">
+        <h2>העיר החדשה שלך ("נווה חדש")</h2>
+        <div id="city-list"></div>
+    </div>
+
+    <script>
+        let game = {
+            money: 0,
+            cps: 0,
+            jobLevel: 0,
+            businesses: { kiosk: 0, store: 0, factory: 0 },
+            cityBuildings: { houses: 0, park: 0, skyscraper: 0 }
+        };
+
+        const jobs = [
+            { name: "שוטף כלים במסעדה", pay: 1, cost: 0, unlocked: true },
+            { name: "מוכר בחנות נוחות", pay: 5, cost: 100, unlocked: false },
+            { name: "מנהל משמרת", pay: 20, cost: 500, unlocked: false }
+        ];
+
+        const businessesData = {
+            kiosk: { name: "קיוסק שכונתי", cost: 1000, income: 10, count: 0 },
+            store: { name: "סופרמרקט", cost: 7500, income: 60, count: 0 },
+            factory: { name: "מפעל טכנולוגי", cost: 40000, income: 300, count: 0 }
+        };
+
+        const cityData = {
+            houses: { name: "שכונת מגורים", cost: 100000, income: 1000, count: 0 },
+            park: { name: "פארק עירוני", cost: 500000, income: 5000, count: 0 },
+            skyscraper: { name: "מרכז מסחרי ענק", cost: 2500000, income: 25000, count: 0 }
+        };
+
+        function updateUI() {
+            document.getElementById('money').innerText = Math.floor(game.money).toLocaleString();
+            document.getElementById('cps').innerText = game.cps.toLocaleString();
+            
+            // עדכון חלקי המשחק לפי התקדמות
+            if (game.money >= 50 || game.jobLevel > 0) {
+                document.getElementById('jobs-section').classList.remove('hidden');
+                renderJobs();
+            }
+            if (game.money >= 800 || totalBusinesses() > 0) {
+                document.getElementById('business-section').classList.remove('hidden');
+                renderBusinesses();
+            }
+            if (game.money >= 80000 || totalCity() > 0) {
+                document.getElementById('city-section').classList.remove('hidden');
+                renderCity();
+            }
+
+            updateStatusText();
+        }
+
+        function totalBusinesses() {
+            return Object.values(game.businesses).reduce((a, b) => a + b, 0);
+        }
+
+        function totalCity() {
+            return Object.values(game.cityBuildings).reduce((a, b) => a + b, 0);
+        }
+
+        function work() {
+            let currentPay = jobs[game.jobLevel].pay;
+            game.money += currentPay;
+            updateUI();
+        }
+
+        function renderJobs() {
+            let html = '';
+            jobs.forEach((job, index) => {
+                if (game.money >= job.cost / 2 || index <= game.jobLevel) {
+                    let isCurrent = game.jobLevel === index;
+                    html += `<div class="shop-item">
+                        <span>${job.name} (שכר: ${job.pay} ₪ לקיליק)</span>
+                        <button ${isCurrent ? 'disabled' : ''} onclick="setJob(${index})">${isCurrent ? 'העבודה הנוכחית שלך' : 'התחל לעבוד'}</button>
+                    </div>`;
+                }
+            });
+            document.getElementById('jobs-list').innerHTML = html;
+        }
+
+        function setJob(index) {
+            game.jobLevel = index;
+            document.getElementById('message').innerText = `עברת לעבוד בתור: ${jobs[index].name}!`;
+            updateUI();
+        }
+
+        function renderBusinesses() {
+            let html = '';
+            for (let key in businessesData) {
+                let biz = businessesData[key];
+                html += `<div class="shop-item">
+                    <span>${biz.name} (יש לך: ${game.businesses[key]})<br><small>עלות: ${biz.cost.toLocaleString()} ₪ | הכנסה: +${biz.income}/שנייה</small></span>
+                    <button onclick="buyBusiness('${key}')">קנה עסק</button>
+                </div>`;
+            }
+            document.getElementById('businesses-list').innerHTML = html;
+        }
+
+        function buyBusiness(key) {
+            let biz = businessesData[key];
+            if (game.money >= biz.cost) {
+                game.money -= biz.cost;
+                game.businesses[key]++;
+                game.cps += biz.income;
+                biz.cost = Math.floor(biz.cost * 1.15); // העלאת מחיר קלה
+                document.getElementById('message').innerText = `רכשת בהצלחה ${biz.name}! העסק החל לייצר הכנסה.`;
+                updateUI();
+            } else {
+                document.getElementById('message').innerText = "אין לך מספיק כסף כדי לקנות עסק זה.";
+            }
+        }
+
+        function renderCity() {
+            let html = '';
+            for (let key in cityData) {
+                let building = cityData[key];
+                html += `<div class="shop-item">
+                    <span>${building.name} (נבנו: ${game.cityBuildings[key]})<br><small>עלות: ${building.cost.toLocaleString()} ₪ | הכנסה: +${building.income}/שנייה</small></span>
+                    <button onclick="buyCityBuilding('${key}')">בנה</button>
+                </div>`;
+            }
+            document.getElementById('city-list').innerHTML = html;
+        }
+
+        function buyCityBuilding(key) {
+            let building = cityData[key];
+            if (game.money >= building.cost) {
+                game.money -= building.cost;
+                game.cityBuildings[key]++;
+                game.cps += building.income;
+                building.cost = Math.floor(building.cost * 1.2);
+                document.getElementById('message').innerText = `בנית חלק חדש בעיר שלך: ${building.name}! העיר גדלה.`;
+                updateUI();
+            } else {
+                document.getElementById('message').innerText = "קניית נדל"ך עירוני דורשת הון גדול יותר!";
+            }
+        }
+
+        function updateStatusText() {
+            let status = "אזרח פשוט";
+            if (totalCity() > 0) status = "ראש עיר ומייסד מטרופולין";
+            else if (totalBusinesses() > 0) status = "בעל עסקים ויזם";
+            else if (game.jobLevel > 0) status = "שכיר מתקדם";
+            document.getElementById('status').innerText = status;
+        }
+
+        // לולאת הזמן של המשחק (רווחים אוטומטיים לשנייה)
+        setInterval(() => {
+            if (game.cps > 0) {
+                game.money += game.cps / 10;
+                updateUI();
+            }
+        }, 100);
+
+        updateUI();
+    </script>
+</body>
+</html>
