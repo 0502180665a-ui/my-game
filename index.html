@@ -4,1512 +4,2431 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hotel Empire</title>
+<title>Hotel Empire - First Person</title>
 
 <style>
-* {
-    box-sizing: border-box;
+*{
+    box-sizing:border-box;
 }
 
-body {
-    margin: 0;
-    font-family: Arial, Helvetica, sans-serif;
-    background: #101522;
-    color: white;
-    overflow-x: hidden;
+html,body{
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    font-family:Arial,Helvetica,sans-serif;
+    background:#111;
 }
 
-button {
-    border: none;
-    cursor: pointer;
-    font-weight: bold;
-    border-radius: 8px;
-    padding: 10px 14px;
-    transition: .15s;
+canvas{
+    display:block;
 }
 
-button:hover {
-    transform: translateY(-2px);
-    filter: brightness(1.12);
+#ui{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    color:white;
+    z-index:10;
 }
 
-button:disabled {
-    opacity: .45;
-    cursor: not-allowed;
-    transform: none;
+#top{
+    position:absolute;
+    top:15px;
+    left:15px;
+    background:rgba(12,18,28,.85);
+    padding:14px 18px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.15);
+    min-width:260px;
 }
 
-.topbar {
-    height: 70px;
-    background: #171d2b;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 25px;
-    border-bottom: 2px solid #293247;
-    position: sticky;
-    top: 0;
-    z-index: 50;
+#money{
+    color:#63f58a;
+    font-size:24px;
+    font-weight:bold;
 }
 
-.logo {
-    font-size: 24px;
-    font-weight: 900;
+.stat{
+    margin-top:5px;
+    color:#cbd4e3;
+    font-size:14px;
 }
 
-.money {
-    color: #55e878;
-    font-size: 20px;
-    font-weight: bold;
+#crosshair{
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    font-size:25px;
+    color:white;
+    text-shadow:0 0 5px black;
 }
 
-.main {
-    display: grid;
-    grid-template-columns: 1fr 360px;
-    min-height: calc(100vh - 70px);
+#interaction{
+    position:absolute;
+    left:50%;
+    bottom:90px;
+    transform:translateX(-50%);
+    background:rgba(10,15,23,.92);
+    padding:14px 22px;
+    border-radius:10px;
+    font-size:17px;
+    display:none;
+    text-align:center;
+    border:1px solid #52647d;
 }
 
-.city {
-    position: relative;
-    min-height: calc(100vh - 70px);
-    padding: 25px;
-    background:
-        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px),
-        #1b2635;
-    background-size: 40px 40px;
-    overflow: hidden;
+#message{
+    position:absolute;
+    left:50%;
+    top:70px;
+    transform:translateX(-50%);
+    background:rgba(15,22,34,.95);
+    padding:12px 22px;
+    border-radius:10px;
+    display:none;
+    font-weight:bold;
 }
 
-.city-title {
-    position: relative;
-    z-index: 2;
-    text-align: center;
-    margin-bottom: 20px;
+#help{
+    position:absolute;
+    bottom:15px;
+    left:15px;
+    background:rgba(12,18,28,.8);
+    padding:12px 15px;
+    border-radius:10px;
+    color:#c7d0de;
+    font-size:13px;
 }
 
-.city-title h1 {
-    margin: 0;
+#objective{
+    position:absolute;
+    right:15px;
+    top:15px;
+    background:rgba(12,18,28,.85);
+    padding:14px;
+    width:260px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.15);
 }
 
-.city-title p {
-    color: #9da8bc;
+#objective h3{
+    margin:0 0 8px 0;
 }
 
-.map {
-    max-width: 1000px;
-    min-height: 650px;
-    margin: auto;
-    background: #263646;
-    border: 5px solid #34475c;
-    border-radius: 20px;
-    padding: 25px;
-    position: relative;
-    box-shadow: 0 20px 60px rgba(0,0,0,.35);
+#objective p{
+    margin:5px 0;
+    color:#c8d1df;
 }
 
-.road {
-    position: absolute;
-    background: #444d58;
-    z-index: 0;
+#menu{
+    position:absolute;
+    right:15px;
+    bottom:15px;
+    pointer-events:auto;
 }
 
-.road.horizontal {
-    width: 100%;
-    height: 70px;
-    left: 0;
-    top: 48%;
+#menu button{
+    display:block;
+    width:170px;
+    margin-top:7px;
+    padding:10px;
+    border:0;
+    border-radius:8px;
+    background:#345fd1;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
 }
 
-.road.vertical {
-    height: 100%;
-    width: 70px;
-    top: 0;
-    left: 48%;
+#menu button:hover{
+    background:#4675ed;
 }
 
-.building {
-    position: absolute;
-    width: 170px;
-    min-height: 130px;
-    background: #202a3a;
-    border: 3px solid #46556c;
-    border-radius: 14px;
-    padding: 15px;
-    z-index: 3;
-    text-align: center;
-    box-shadow: 0 10px 25px rgba(0,0,0,.25);
+#buildMenu{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.75);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:30;
+    pointer-events:auto;
 }
 
-.building:hover {
-    border-color: #63a9ff;
+#buildBox{
+    background:#192233;
+    border:1px solid #53647d;
+    border-radius:15px;
+    padding:25px;
+    width:400px;
+    max-width:90%;
 }
 
-.building .icon {
-    font-size: 40px;
+#buildBox h2{
+    margin-top:0;
 }
 
-.building h3 {
-    margin: 5px 0;
+.buildButton{
+    width:100%;
+    margin:7px 0;
+    padding:12px;
+    background:#345fd1;
+    color:white;
+    border:0;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:bold;
 }
 
-.building p {
-    margin: 3px;
-    color: #aeb8c9;
-    font-size: 13px;
+.closeButton{
+    width:100%;
+    padding:10px;
+    margin-top:10px;
+    background:#444f61;
+    color:white;
+    border:0;
+    border-radius:8px;
+    cursor:pointer;
 }
 
-.hotel {
-    width: 260px;
-    min-height: 190px;
-    left: 18px;
-    top: 25px;
-    background: linear-gradient(145deg,#3c2d56,#252e48);
-    border-color: #9a70dc;
-}
-
-.hotel .icon {
-    font-size: 55px;
-}
-
-.pizzeria {
-    left: 40px;
-    bottom: 30px;
-}
-
-.restaurant {
-    right: 40px;
-    bottom: 30px;
-}
-
-.parking {
-    right: 30px;
-    top: 35px;
-}
-
-.mall {
-    right: 220px;
-    top: 35px;
-}
-
-.locked {
-    opacity: .5;
-    filter: grayscale(1);
-}
-
-.empty-plot {
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%,-50%);
-    width: 200px;
-    min-height: 130px;
-    background: #2d3b4a;
-    border: 3px dashed #607086;
-}
-
-.panel {
-    background: #141a27;
-    border-left: 2px solid #293247;
-    padding: 18px;
-    overflow-y: auto;
-    max-height: calc(100vh - 70px);
-}
-
-.panel-section {
-    background: #1b2332;
-    border: 1px solid #303b4f;
-    border-radius: 12px;
-    padding: 14px;
-    margin-bottom: 15px;
-}
-
-.panel-section h2,
-.panel-section h3 {
-    margin-top: 0;
-}
-
-.stat {
-    display: flex;
-    justify-content: space-between;
-    margin: 8px 0;
-    color: #bdc7d7;
-}
-
-.stat strong {
-    color: white;
-}
-
-.green {
-    color: #55e878;
-}
-
-.red {
-    color: #ff6868;
-}
-
-.gold {
-    color: #ffd35c;
-}
-
-.blue {
-    color: #6eb3ff;
-}
-
-.progress {
-    width: 100%;
-    height: 10px;
-    background: #30394a;
-    border-radius: 10px;
-    overflow: hidden;
-    margin: 8px 0;
-}
-
-.progress-bar {
-    height: 100%;
-    background: #63a9ff;
-    width: 0%;
-    transition: width .3s;
-}
-
-.action {
-    width: 100%;
-    margin-top: 8px;
-    background: #386ed8;
-    color: white;
-}
-
-.secondary {
-    background: #343f52;
-}
-
-.green-btn {
-    background: #2caa59;
-    color: white;
-}
-
-.gold-btn {
-    background: #b98320;
-    color: white;
-}
-
-.danger {
-    background: #a43c46;
-    color: white;
-}
-
-.build-list {
-    display: grid;
-    gap: 8px;
-}
-
-.build-item {
-    background: #242e40;
-    padding: 10px;
-    border-radius: 9px;
-    border: 1px solid #354158;
-}
-
-.build-item h4 {
-    margin: 0 0 5px;
-}
-
-.build-item p {
-    font-size: 12px;
-    color: #aab5c6;
-}
-
-.task {
-    padding: 9px;
-    border-radius: 8px;
-    background: #252f41;
-    margin: 7px 0;
-}
-
-.task.done {
-    opacity: .55;
-    text-decoration: line-through;
-}
-
-.notification {
-    position: fixed;
-    right: 20px;
-    bottom: 20px;
-    background: #202b3c;
-    border: 1px solid #51627b;
-    padding: 15px 20px;
-    border-radius: 10px;
-    z-index: 100;
-    box-shadow: 0 10px 30px rgba(0,0,0,.4);
-    display: none;
-}
-
-.modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.72);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 90;
-    padding: 20px;
-}
-
-.modal-box {
-    width: 500px;
-    max-width: 100%;
-    max-height: 90vh;
-    overflow-y: auto;
-    background: #192131;
-    border: 2px solid #3d4d65;
-    border-radius: 15px;
-    padding: 22px;
-}
-
-.close {
-    float: right;
-    background: #3a4659;
-    color: white;
-}
-
-.worker {
-    background: #242f41;
-    padding: 12px;
-    border-radius: 9px;
-    margin: 8px 0;
-}
-
-.badge {
-    display: inline-block;
-    padding: 4px 8px;
-    border-radius: 20px;
-    background: #34445c;
-    color: #c9d5e8;
-    font-size: 11px;
-}
-
-@media(max-width: 900px) {
-    .main {
-        grid-template-columns: 1fr;
-    }
-
-    .panel {
-        max-height: none;
-        border-left: none;
-        border-top: 2px solid #293247;
-    }
-
-    .city {
-        min-height: 700px;
-    }
-}
-
-@media(max-width: 600px) {
-    .topbar {
-        padding: 0 12px;
-    }
-
-    .logo {
-        font-size: 18px;
-    }
-
-    .money {
-        font-size: 16px;
-    }
-
-    .map {
-        transform: scale(.85);
-        transform-origin: top center;
-        width: 650px;
-        margin-left: -80px;
-    }
+#locked{
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    color:white;
+    font-size:20px;
+    text-align:center;
+    background:rgba(0,0,0,.65);
+    padding:25px;
+    border-radius:15px;
+    pointer-events:none;
 }
 </style>
 </head>
 
 <body>
 
-<div class="topbar">
-    <div class="logo">🏨 HOTEL EMPIRE</div>
-    <div>
-        <span id="money" class="money">$100</span>
+<div id="ui">
+
+    <div id="top">
+        <div id="money">$100</div>
+        <div class="stat">Guests: <span id="guests">0</span></div>
+        <div class="stat">Rooms: <span id="rooms">5</span></div>
+        <div class="stat">Clean Rooms: <span id="cleanRooms">5</span></div>
+        <div class="stat">Reputation: ⭐ <span id="rep">1.0</span></div>
     </div>
-</div>
 
-<div class="main">
-
-<div class="city">
-
-    <div class="city-title">
-        <h1 id="hotelName">Your Small Hotel</h1>
-        <p>
-            <span id="timeText">Morning</span>
-            •
-            <span id="weatherText">Sunny</span>
-            •
-            ⭐ <span id="reputationText">1.0</span>
+    <div id="objective">
+        <h3>🎯 Current Objective</h3>
+        <p id="objectiveText">
+            Welcome to your hotel.
         </p>
     </div>
 
-    <div class="map">
+    <div id="crosshair">+</div>
 
-        <div class="road horizontal"></div>
-        <div class="road vertical"></div>
+    <div id="interaction"></div>
 
-        <div class="building hotel" onclick="openHotel()">
-            <div class="icon">🏨</div>
-            <h3>Hotel</h3>
-            <p><span id="roomsText">5</span> rooms</p>
-            <p>Click to manage</p>
-        </div>
+    <div id="message"></div>
 
-        <div class="building pizzeria locked" id="pizzeriaBuilding">
-            <div class="icon">🍕</div>
-            <h3>Pizzeria</h3>
-            <p id="pizzeriaStatus">Locked</p>
-        </div>
+    <div id="help">
+        <b>WASD</b> Move<br>
+        <b>Mouse</b> Look around<br>
+        <b>E</b> Interact<br>
+        <b>ESC</b> Release mouse
+    </div>
 
-        <div class="building restaurant locked" id="restaurantBuilding">
-            <div class="icon">🍽️</div>
-            <h3>Restaurant</h3>
-            <p id="restaurantStatus">Locked</p>
-        </div>
+    <div id="menu">
+        <button onclick="openBuildMenu()">🏗️ Build</button>
+        <button onclick="hireCleaner()">👷 Hire Cleaner ($1,000)</button>
+        <button onclick="saveGame()">💾 Save</button>
+    </div>
 
-        <div class="building parking locked" id="parkingBuilding">
-            <div class="icon">🚗</div>
-            <h3>Parking</h3>
-            <p id="parkingStatus">Locked</p>
-        </div>
+</div>
 
-        <div class="building mall locked" id="mallBuilding">
-            <div class="icon">🛍️</div>
-            <h3>Shopping Mall</h3>
-            <p id="mallStatus">Locked</p>
-        </div>
+<div id="buildMenu">
+    <div id="buildBox">
 
-        <div class="building empty-plot">
-            <div class="icon">🏗️</div>
-            <h3>Expansion Plot</h3>
-            <p>Build something new</p>
-        </div>
+        <h2>🏗️ Build Your Hotel</h2>
+
+        <p id="buildMoney"></p>
+
+        <button class="buildButton" onclick="buildRooms()">
+            🛏️ Add 5 Rooms — $500
+        </button>
+
+        <button class="buildButton" onclick="buildPizzeria()">
+            🍕 Build Pizzeria — $5,000
+        </button>
+
+        <button class="buildButton" onclick="buildRestaurant()">
+            🍽️ Build Restaurant — $15,000
+        </button>
+
+        <button class="buildButton" onclick="buildParking()">
+            🚗 Build Parking — $2,000
+        </button>
+
+        <button class="buildButton" onclick="buildMall()">
+            🛍️ Build Shopping Mall — $100,000
+        </button>
+
+        <button class="closeButton" onclick="closeBuildMenu()">
+            Close
+        </button>
 
     </div>
 </div>
 
-<div class="panel">
-
-    <div class="panel-section">
-        <h2>📊 Management</h2>
-
-        <div class="stat">
-            <span>Cash</span>
-            <strong id="cashStat">$100</strong>
-        </div>
-
-        <div class="stat">
-            <span>Income / min</span>
-            <strong class="green" id="incomeStat">$0</strong>
-        </div>
-
-        <div class="stat">
-            <span>Expenses / min</span>
-            <strong class="red" id="expenseStat">$0</strong>
-        </div>
-
-        <div class="stat">
-            <span>Profit / min</span>
-            <strong id="profitStat">$0</strong>
-        </div>
-
-        <div class="stat">
-            <span>Guests</span>
-            <strong id="guestStat">0</strong>
-        </div>
-
-        <div class="stat">
-            <span>Reputation</span>
-            <strong class="gold" id="repStat">⭐ 1.0</strong>
-        </div>
-    </div>
-
-    <div class="panel-section">
-        <h3>👤 Work Yourself</h3>
-        <p style="color:#aeb8c9;font-size:13px;">
-            You are the only employee. Work manually until you can afford help.
-        </p>
-
-        <button class="action green-btn" onclick="work()">
-            🧹 Clean / Serve Guest +$10
-        </button>
-
-        <button class="action secondary" onclick="checkInGuest()">
-            🛎️ Check In Guest
-        </button>
-    </div>
-
-    <div class="panel-section">
-        <h3>🏗️ Build & Expand</h3>
-
-        <div class="build-list">
-
-            <div class="build-item">
-                <h4>🛏️ Add 5 Rooms</h4>
-                <p>More rooms = more guests and higher income.</p>
-                <button class="action" onclick="build('rooms')">
-                    Build for $500
-                </button>
-            </div>
-
-            <div class="build-item">
-                <h4>🚗 Parking</h4>
-                <p>Guests pay for parking.</p>
-                <button class="action" onclick="build('parking')">
-                    Build for $2,000
-                </button>
-            </div>
-
-            <div class="build-item">
-                <h4>🍕 Pizzeria</h4>
-                <p>Serve pizza to guests and city residents.</p>
-                <button class="action" onclick="build('pizzeria')">
-                    Build for $5,000
-                </button>
-            </div>
-
-            <div class="build-item">
-                <h4>🍽️ Restaurant</h4>
-                <p>A full restaurant increases your reputation.</p>
-                <button class="action" onclick="build('restaurant')">
-                    Build for $15,000
-                </button>
-            </div>
-
-            <div class="build-item">
-                <h4>👨‍🍳 Chef Restaurant</h4>
-                <p>Luxury dining for VIP guests.</p>
-                <button class="action" onclick="build('chef')">
-                    Build for $50,000
-                </button>
-            </div>
-
-            <div class="build-item">
-                <h4>🛍️ Shopping Mall</h4>
-                <p>A huge source of passive income.</p>
-                <button class="action" onclick="build('mall')">
-                    Build for $100,000
-                </button>
-            </div>
-
-        </div>
-    </div>
-
-    <div class="panel-section">
-        <h3>👷 Employees</h3>
-
-        <div id="workers">
-            <p style="color:#8995aa;">
-                You don't have any employees yet.
-            </p>
-        </div>
-
-        <button class="action gold-btn" onclick="hire('cleaner')">
-            Hire Cleaner — $1,000
-        </button>
-
-        <button class="action gold-btn" onclick="hire('receptionist')">
-            Hire Receptionist — $2,500
-        </button>
-
-        <button class="action gold-btn" onclick="hire('chef')">
-            Hire Chef — $5,000
-        </button>
-
-        <button class="action gold-btn" onclick="hire('manager')">
-            Hire Manager — $15,000
-        </button>
-    </div>
-
-    <div class="panel-section">
-        <h3>🎯 Missions</h3>
-        <div id="missions"></div>
-    </div>
-
-    <div class="panel-section">
-        <h3>🏆 Achievements</h3>
-        <div id="achievements"></div>
-    </div>
-
-    <div class="panel-section">
-        <h3>♻️ Prestige</h3>
-        <p style="font-size:13px;color:#aeb8c9;">
-            Reach $1,000,000 to sell your empire and start again
-            with a permanent income bonus.
-        </p>
-
-        <div class="stat">
-            <span>Prestige Level</span>
-            <strong id="prestigeText">0</strong>
-        </div>
-
-        <button class="action" onclick="prestige()">
-            Start New Empire
-        </button>
-    </div>
-
-    <div class="panel-section">
-        <button class="action secondary" onclick="saveGame()">
-            💾 Save Game
-        </button>
-
-        <button class="action danger" onclick="resetGame()">
-            Reset Game
-        </button>
-    </div>
-
-</div>
+<div id="locked">
+    Click anywhere to enter your hotel
 </div>
 
-<div class="notification" id="notification"></div>
-
-<div class="modal" id="hotelModal">
-    <div class="modal-box">
-
-        <button class="close" onclick="closeHotel()">X</button>
-
-        <h2>🏨 Hotel Management</h2>
-
-        <div class="stat">
-            <span>Total Rooms</span>
-            <strong id="modalRooms">5</strong>
-        </div>
-
-        <div class="stat">
-            <span>Room Price</span>
-            <strong id="modalPrice">$50</strong>
-        </div>
-
-        <div class="stat">
-            <span>Occupied Rooms</span>
-            <strong id="modalOccupied">0</strong>
-        </div>
-
-        <hr style="border-color:#303b4f">
-
-        <h3>💰 Room Pricing</h3>
-
-        <p style="color:#aeb8c9;font-size:13px;">
-            Higher prices increase income but can reduce guest demand.
-        </p>
-
-        <button class="action" onclick="changePrice(-5)">
-            - $5
-        </button>
-
-        <button class="action" onclick="changePrice(5)">
-            + $5
-        </button>
-
-        <h3 style="margin-top:20px;">⬆️ Hotel Upgrades</h3>
-
-        <button class="action" onclick="upgradeHotel()">
-            Upgrade Hotel — $2,500
-        </button>
-
-        <p id="hotelLevelText"></p>
-
-    </div>
-</div>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 
 <script>
 
-let game = {
-    money: 100,
-    rooms: 5,
-    roomPrice: 50,
-    occupied: 0,
-    reputation: 1,
-    guests: 0,
-    income: 0,
-    expenses: 0,
-    hotelLevel: 1,
-    prestige: 0,
+/* =========================================================
+   HOTEL EMPIRE
+   FIRST PERSON HOTEL TYCOON
+========================================================= */
 
-    buildings: {
-        parking: false,
-        pizzeria: false,
-        restaurant: false,
-        chef: false,
-        mall: false
-    },
+let scene;
+let camera;
+let renderer;
+let clock;
 
-    workers: [],
+let keys = {};
 
-    stats: {
-        work: 0,
-        guestsServed: 0,
-        moneyEarned: 0,
-        roomsBuilt: 0,
-        buildingsBuilt: 0
-    },
-
-    achievements: []
+let player = {
+    x:0,
+    y:1.7,
+    z:7,
+    speed:4
 };
 
-const missions = [
-    {
-        id:"work10",
-        text:"Work 10 times",
-        target:10,
-        type:"work",
-        reward:250
-    },
-    {
-        id:"guest10",
-        text:"Serve 10 guests",
-        target:10,
-        type:"guestsServed",
-        reward:500
-    },
-    {
-        id:"money5000",
-        text:"Earn $5,000",
-        target:5000,
-        type:"moneyEarned",
-        reward:1000
-    },
-    {
-        id:"rooms20",
-        text:"Build 20 rooms",
-        target:20,
-        type:"roomsBuilt",
-        reward:2000
-    },
-    {
-        id:"business",
-        text:"Build your first business",
-        target:1,
-        type:"buildingsBuilt",
-        reward:3000
-    }
-];
+let game = {
+    money:100,
 
-const achievementList = [
-    {
-        id:"firstMoney",
-        text:"Make your first $100",
-        check:()=>game.stats.moneyEarned >= 100
-    },
-    {
-        id:"firstWorker",
-        text:"Hire your first employee",
-        check:()=>game.workers.length >= 1
-    },
-    {
-        id:"tenRooms",
-        text:"Own 10 rooms",
-        check:()=>game.rooms >= 10
-    },
-    {
-        id:"fiveStar",
-        text:"Reach 5 star reputation",
-        check:()=>game.reputation >= 5
-    },
-    {
-        id:"millionaire",
-        text:"Have $1,000,000",
-        check:()=>game.money >= 1000000
-    },
-    {
-        id:"empire",
-        text:"Build the Shopping Mall",
-        check:()=>game.buildings.mall
-    }
-];
+    rooms:5,
 
-function formatMoney(n) {
-    if (n >= 1000000000)
-        return "$" + (n/1000000000).toFixed(2) + "B";
+    roomPrice:50,
 
-    if (n >= 1000000)
-        return "$" + (n/1000000).toFixed(2) + "M";
+    guests:0,
 
-    if (n >= 1000)
-        return "$" + (n/1000).toFixed(1) + "K";
+    reputation:1,
 
-    return "$" + Math.floor(n);
-}
+    cleanRooms:5,
 
-function notify(text) {
-    const box = document.getElementById("notification");
+    workers:0,
 
-    box.innerText = text;
-    box.style.display = "block";
-
-    setTimeout(()=>{
-        box.style.display = "none";
-    },3000);
-}
-
-function addMoney(amount) {
-    game.money += amount;
-
-    if(amount > 0) {
-        game.stats.moneyEarned += amount;
-    }
-
-    update();
-}
-
-function work() {
-    addMoney(10);
-
-    game.stats.work++;
-
-    if(game.stats.work % 5 === 0) {
-        game.reputation = Math.min(5,game.reputation + .05);
-    }
-
-    notify("💵 You worked and earned $10!");
-}
-
-function checkInGuest() {
-
-    if(game.occupied >= game.rooms) {
-        notify("❌ No available rooms!");
-        return;
-    }
-
-    game.occupied++;
-    game.guests++;
-    game.stats.guestsServed++;
-
-    addMoney(game.roomPrice);
-
-    notify("🛎️ Guest checked in! +" + formatMoney(game.roomPrice));
-
-    setTimeout(()=>{
-        if(game.occupied > 0) {
-            game.occupied--;
-
-            game.reputation = Math.min(
-                5,
-                game.reputation + .01
-            );
-        }
-
-        update();
-
-    },15000);
-}
-
-function build(type) {
-
-    const prices = {
-        rooms:500,
-        parking:2000,
-        pizzeria:5000,
-        restaurant:15000,
-        chef:50000,
-        mall:100000
-    };
-
-    const price = prices[type];
-
-    if(game.money < price) {
-        notify("❌ You need " + formatMoney(price-game.money) + " more.");
-        return;
-    }
-
-    if(type !== "rooms" && game.buildings[type]) {
-        notify("Already built!");
-        return;
-    }
-
-    game.money -= price;
-
-    if(type === "rooms") {
-        game.rooms += 5;
-        game.stats.roomsBuilt += 5;
-
-        notify("🏗️ 5 new rooms have been built!");
-    }
-    else {
-        game.buildings[type] = true;
-        game.stats.buildingsBuilt++;
-
-        game.reputation = Math.min(5, game.reputation + .25);
-
-        notify("🏗️ New building completed!");
-    }
-
-    update();
-}
-
-function hire(type) {
-
-    const data = {
-        cleaner:{
-            name:"Cleaner",
-            salary:100,
-            speed:1
-        },
-        receptionist:{
-            name:"Receptionist",
-            salary:250,
-            speed:1.5
-        },
-        chef:{
-            name:"Chef",
-            salary:400,
-            speed:2
-        },
-        manager:{
-            name:"Manager",
-            salary:750,
-            speed:3
-        }
-    };
-
-    const d = data[type];
-
-    const cost = {
-        cleaner:1000,
-        receptionist:2500,
-        chef:5000,
-        manager:15000
-    }[type];
-
-    if(game.money < cost) {
-        notify("❌ Not enough money!");
-        return;
-    }
-
-    game.money -= cost;
-
-    game.workers.push({
-        type:type,
-        name:d.name,
-        level:1,
-        salary:d.salary,
-        speed:d.speed
-    });
-
-    notify("👷 You hired a " + d.name + "!");
-
-    update();
-}
-
-function upgradeWorker(index) {
-
-    const worker = game.workers[index];
-
-    const cost = 1000 * worker.level;
-
-    if(game.money < cost) {
-        notify("❌ Not enough money!");
-        return;
-    }
-
-    game.money -= cost;
-
-    worker.level++;
-    worker.salary += 50;
-
-    notify("⬆️ " + worker.name + " upgraded to Level " + worker.level);
-
-    update();
-}
-
-function upgradeHotel() {
-
-    const cost = 2500 * game.hotelLevel;
-
-    if(game.money < cost) {
-        notify("❌ You need " + formatMoney(cost) + ".");
-        return;
-    }
-
-    game.money -= cost;
-    game.hotelLevel++;
-
-    game.reputation = Math.min(5,game.reputation + .2);
-
-    notify("🏨 Hotel upgraded to Level " + game.hotelLevel);
-
-    update();
-}
-
-function changePrice(amount) {
-
-    game.roomPrice += amount;
-
-    if(game.roomPrice < 20)
-        game.roomPrice = 20;
-
-    if(game.roomPrice > 500)
-        game.roomPrice = 500;
-
-    update();
-}
-
-function openHotel() {
-    document.getElementById("hotelModal").style.display = "flex";
-    update();
-}
-
-function closeHotel() {
-    document.getElementById("hotelModal").style.display = "none";
-}
-
-function calculateIncome() {
-
-    let income = 0;
-
-    income += game.rooms * (game.roomPrice / 60);
-
-    if(game.buildings.parking)
-        income += 15;
-
-    if(game.buildings.pizzeria)
-        income += 25;
-
-    if(game.buildings.restaurant)
-        income += 80;
-
-    if(game.buildings.chef)
-        income += 300;
-
-    if(game.buildings.mall)
-        income += 750;
-
-    const prestigeBonus = 1 + game.prestige * .1;
-
-    return income * prestigeBonus;
-}
-
-function calculateExpenses() {
-
-    let expenses = 0;
-
-    game.workers.forEach(worker=>{
-        expenses += worker.salary;
-    });
-
-    return expenses;
-}
-
-function updateWorkers() {
-
-    const container = document.getElementById("workers");
-
-    if(game.workers.length === 0) {
-        container.innerHTML = `
-        <p style="color:#8995aa;">
-        You don't have any employees yet.
-        </p>`;
-        return;
-    }
-
-    container.innerHTML = "";
-
-    game.workers.forEach((worker,index)=>{
-
-        const div = document.createElement("div");
-
-        div.className = "worker";
-
-        div.innerHTML = `
-            <strong>${worker.name}</strong>
-            <span class="badge">Level ${worker.level}</span>
-
-            <div style="font-size:12px;color:#aeb8c9;margin-top:6px;">
-                Salary: ${formatMoney(worker.salary)}/min
-            </div>
-
-            <button
-                class="action"
-                onclick="upgradeWorker(${index})">
-                Upgrade — ${formatMoney(1000 * worker.level)}
-            </button>
-        `;
-
-        container.appendChild(div);
-    });
-}
-
-function updateMissions() {
-
-    const container = document.getElementById("missions");
-
-    container.innerHTML = "";
-
-    missions.forEach(m=>{
-
-        const current = game.stats[m.type] || 0;
-
-        const completed = current >= m.target;
-
-        const div = document.createElement("div");
-
-        div.className = "task " + (completed ? "done" : "");
-
-        div.innerHTML = `
-            <strong>${completed ? "✅" : "🎯"} ${m.text}</strong>
-            <div style="font-size:12px;color:#9da8bc;margin-top:4px;">
-                ${Math.min(current,m.target)} / ${m.target}
-            </div>
-
-            <div class="progress">
-                <div class="progress-bar"
-                    style="width:${Math.min(100,current/m.target*100)}%">
-                </div>
-            </div>
-
-            ${
-                completed
-                ?
-                `<span class="green">Reward claimed</span>`
-                :
-                `<span class="gold">Reward: ${formatMoney(m.reward)}</span>`
-            }
-        `;
-
-        if(completed && !game.achievements.includes("mission_"+m.id)) {
-
-            game.achievements.push("mission_"+m.id);
-
-            game.money += m.reward;
-
-            notify("🎯 Mission complete! +" + formatMoney(m.reward));
-        }
-
-        container.appendChild(div);
-    });
-}
-
-function updateAchievements() {
-
-    const container = document.getElementById("achievements");
-
-    container.innerHTML = "";
-
-    achievementList.forEach(a=>{
-
-        const done = game.achievements.includes(a.id);
-
-        if(!done && a.check()) {
-            game.achievements.push(a.id);
-            notify("🏆 Achievement unlocked: " + a.text);
-        }
-
-        const div = document.createElement("div");
-
-        div.className = "task " + (done ? "done" : "");
-
-        div.innerHTML =
-            `${done ? "🏆" : "🔒"} ${a.text}`;
-
-        container.appendChild(div);
-    });
-}
-
-function updateBuildings() {
-
-    const data = [
-        ["pizzeria","pizzeriaBuilding","pizzeriaStatus"],
-        ["restaurant","restaurantBuilding","restaurantStatus"],
-        ["parking","parkingBuilding","parkingStatus"],
-        ["mall","mallBuilding","mallStatus"]
-    ];
-
-    data.forEach(x=>{
-
-        const building = document.getElementById(x[1]);
-        const status = document.getElementById(x[2]);
-
-        if(game.buildings[x[0]]) {
-
-            building.classList.remove("locked");
-            status.innerText = "Open";
-        }
-        else {
-            building.classList.add("locked");
-            status.innerText = "Locked";
-        }
-    });
-}
-
-function update() {
-
-    const income = calculateIncome();
-    const expenses = calculateExpenses();
-    const profit = income - expenses;
-
-    document.getElementById("money").innerText =
-        formatMoney(game.money);
-
-    document.getElementById("cashStat").innerText =
-        formatMoney(game.money);
-
-    document.getElementById("incomeStat").innerText =
-        formatMoney(income);
-
-    document.getElementById("expenseStat").innerText =
-        formatMoney(expenses);
-
-    document.getElementById("profitStat").innerText =
-        formatMoney(profit);
-
-    document.getElementById("guestStat").innerText =
-        game.guests;
-
-    document.getElementById("repStat").innerText =
-        "⭐ " + game.reputation.toFixed(1);
-
-    document.getElementById("reputationText").innerText =
-        game.reputation.toFixed(1);
-
-    document.getElementById("roomsText").innerText =
-        game.rooms;
-
-    document.getElementById("modalRooms").innerText =
-        game.rooms;
-
-    document.getElementById("modalPrice").innerText =
-        formatMoney(game.roomPrice);
-
-    document.getElementById("modalOccupied").innerText =
-        game.occupied;
-
-    document.getElementById("hotelLevelText").innerText =
-        "Hotel Level: " + game.hotelLevel;
-
-    document.getElementById("prestigeText").innerText =
-        game.prestige;
-
-    updateWorkers();
-    updateMissions();
-    updateAchievements();
-    updateBuildings();
-}
-
-function gameTick() {
-
-    const income = calculateIncome();
-    const expenses = calculateExpenses();
-
-    const profit = income - expenses;
-
-    game.money += profit / 60;
-
-    if(game.money < 0)
-        game.money = 0;
-
-    // Automatic guests
-    if(Math.random() < 0.04 && game.occupied < game.rooms) {
-        game.occupied++;
-        game.guests++;
-        game.stats.guestsServed++;
-    }
-
-    // Guests leave
-    if(Math.random() < 0.03 && game.occupied > 0) {
-        game.occupied--;
-
-        if(Math.random() < .8)
-            game.reputation = Math.min(5,game.reputation + .005);
-    }
-
-    // Worker efficiency
-    if(game.workers.length > 0) {
-        game.reputation = Math.min(
-            5,
-            game.reputation + 0.001 * game.workers.length
-        );
-    }
-
-    update();
-}
-
-function randomEvent() {
-
-    const events = [
-
-        {
-            text:"🎉 A tourist group arrived! You earned a bonus.",
-            money:500
-        },
-
-        {
-            text:"⭐ A VIP guest loved your hotel!",
-            money:1000,
-            rep:.1
-        },
-
-        {
-            text:"🔧 Elevator broke. Repairs cost money.",
-            money:-300
-        },
-
-        {
-            text:"🍕 Food festival! Your restaurants are packed.",
-            money:1500
-        },
-
-        {
-            text:"🌧️ Heavy rain brought customers inside.",
-            money:700
-        },
-
-        {
-            text:"💼 A business conference booked your hotel!",
-            money:3000,
-            rep:.15
-        }
-
-    ];
-
-    const event =
-        events[Math.floor(Math.random()*events.length)];
-
-    addMoney(event.money);
-
-    if(event.rep)
-        game.reputation =
-            Math.min(5,game.reputation + event.rep);
-
-    notify(event.text);
-}
-
-function updateTime() {
-
-    const hour = new Date().getHours();
-
-    let time = "Morning";
-
-    if(hour >= 12 && hour < 18)
-        time = "Afternoon";
-
-    if(hour >= 18 && hour < 23)
-        time = "Evening";
-
-    if(hour >= 23 || hour < 6)
-        time = "Night";
-
-    document.getElementById("timeText").innerText = time;
-
-    const weather = [
-        "Sunny ☀️",
-        "Cloudy ☁️",
-        "Rainy 🌧️",
-        "Windy 🌬️"
-    ];
-
-    const index =
-        Math.floor(Date.now()/60000) % weather.length;
-
-    document.getElementById("weatherText").innerText =
-        weather[index];
-}
-
-function prestige() {
-
-    if(game.money < 1000000) {
-        notify("❌ You need $1,000,000 to Prestige.");
-        return;
-    }
-
-    if(!confirm(
-        "Sell your empire and start a new one?\n\n" +
-        "You will receive +1 permanent income bonus."
-    ))
-        return;
-
-    game.money = 100;
-    game.rooms = 5;
-    game.roomPrice = 50;
-    game.occupied = 0;
-    game.guests = 0;
-    game.reputation = 1;
-    game.hotelLevel = 1;
-
-    game.buildings = {
-        parking:false,
+    buildings:{
         pizzeria:false,
         restaurant:false,
-        chef:false,
+        parking:false,
         mall:false
-    };
+    },
 
-    game.workers = [];
+    roomStates:[],
 
-    game.stats = {
-        work:0,
-        guestsServed:0,
-        moneyEarned:0,
-        roomsBuilt:0,
-        buildingsBuilt:0
-    };
+    totalEarned:0
+};
 
-    game.prestige++;
+let customers=[];
+let roomObjects=[];
 
-    notify(
-        "♻️ New Empire started! Permanent income bonus: +" +
-        (game.prestige*10) + "%"
+let interactionTarget=null;
+
+let receptionistPosition={
+    x:0,
+    z:-1
+};
+
+let firstPersonLocked=false;
+
+const roomPositions=[
+    {x:-7,z:-7},
+    {x:-2,z:-7},
+    {x:3,z:-7},
+    {x:8,z:-7},
+    {x:13,z:-7}
+];
+
+/* =========================================================
+   INITIALIZE
+========================================================= */
+
+function init(){
+
+    loadGame();
+
+    scene=new THREE.Scene();
+
+    scene.background=new THREE.Color(0x8ab3d6);
+
+    scene.fog=new THREE.Fog(0x8ab3d6,20,80);
+
+    camera=new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth/window.innerHeight,
+        .1,
+        1000
     );
 
-    saveGame();
-    update();
+    camera.position.set(
+        player.x,
+        player.y,
+        player.z
+    );
+
+    renderer=new THREE.WebGLRenderer({
+        antialias:true
+    });
+
+    renderer.setSize(
+        window.innerWidth,
+        window.innerHeight
+    );
+
+    renderer.shadowMap.enabled=true;
+
+    document.body.appendChild(renderer.domElement);
+
+    clock=new THREE.Clock();
+
+    createLighting();
+
+    createWorld();
+
+    createHotel();
+
+    createReception();
+
+    createRooms();
+
+    setupControls();
+
+    updateUI();
+
+    animate();
 }
 
-function saveGame() {
+/* =========================================================
+   LIGHTING
+========================================================= */
+
+function createLighting(){
+
+    const ambient=new THREE.AmbientLight(
+        0xffffff,
+        .65
+    );
+
+    scene.add(ambient);
+
+    const sun=new THREE.DirectionalLight(
+        0xffffff,
+        1
+    );
+
+    sun.position.set(
+        20,
+        30,
+        10
+    );
+
+    sun.castShadow=true;
+
+    scene.add(sun);
+}
+
+/* =========================================================
+   WORLD
+========================================================= */
+
+function createWorld(){
+
+    const groundGeometry=
+        new THREE.PlaneGeometry(
+            150,
+            150
+        );
+
+    const groundMaterial=
+        new THREE.MeshStandardMaterial({
+            color:0x4b7049
+        });
+
+    const ground=
+        new THREE.Mesh(
+            groundGeometry,
+            groundMaterial
+        );
+
+    ground.rotation.x=-Math.PI/2;
+
+    ground.receiveShadow=true;
+
+    scene.add(ground);
+
+    /* Road */
+
+    const roadMaterial=
+        new THREE.MeshStandardMaterial({
+            color:0x33383f
+        });
+
+    const road=
+        new THREE.Mesh(
+            new THREE.BoxGeometry(
+                100,
+                .05,
+                8
+            ),
+            roadMaterial
+        );
+
+    road.position.set(
+        0,
+        .02,
+        15
+    );
+
+    scene.add(road);
+
+    /* Trees */
+
+    for(let i=0;i<20;i++){
+
+        const x=
+            Math.random()*100-50;
+
+        const z=
+            Math.random()*100-50;
+
+        createTree(x,z);
+    }
+}
+
+function createTree(x,z){
+
+    const trunk=
+        new THREE.Mesh(
+            new THREE.CylinderGeometry(
+                .25,
+                .35,
+                2,
+                8
+            ),
+            new THREE.MeshStandardMaterial({
+                color:0x70452a
+            })
+        );
+
+    trunk.position.set(
+        x,
+        1,
+        z
+    );
+
+    scene.add(trunk);
+
+    const leaves=
+        new THREE.Mesh(
+            new THREE.SphereGeometry(
+                1.5,
+                10,
+                10
+            ),
+            new THREE.MeshStandardMaterial({
+                color:0x2d6936
+            })
+        );
+
+    leaves.position.set(
+        x,
+        2.5,
+        z
+    );
+
+    scene.add(leaves);
+}
+
+/* =========================================================
+   HOTEL
+========================================================= */
+
+function createHotel(){
+
+    /* Floor */
+
+    const floor=
+        new THREE.Mesh(
+            new THREE.BoxGeometry(
+                32,
+                .2,
+                20
+            ),
+            new THREE.MeshStandardMaterial({
+                color:0xb9b9b9
+            })
+        );
+
+    floor.position.set(
+        3,
+        0,
+        -3
+    );
+
+    floor.receiveShadow=true;
+
+    scene.add(floor);
+
+    /* Back wall */
+
+    createWall(
+        3,
+        4,
+        -13,
+        32,
+        .4,
+        8
+    );
+
+    /* Left wall */
+
+    createWall(
+        -13,
+        4,
+        -3,
+        .4,
+        8,
+        20
+    );
+
+    /* Right wall */
+
+    createWall(
+        19,
+        4,
+        -3,
+        .4,
+        8,
+        20
+    );
+
+    /* Entrance frame */
+
+    createWall(
+        -6,
+        4,
+        7,
+        14,
+        8,
+        .4
+    );
+
+    createWall(
+        14,
+        4,
+        7,
+        10,
+        8,
+        .4
+    );
+
+    /* Roof */
+
+    const roof=
+        new THREE.Mesh(
+            new THREE.BoxGeometry(
+                33,
+                .5,
+                21
+            ),
+            new THREE.MeshStandardMaterial({
+                color:0x4d394a
+            })
+        );
+
+    roof.position.set(
+        3,
+        8,
+        -3
+    );
+
+    scene.add(roof);
+
+}
+
+/* =========================================================
+   WALL
+========================================================= */
+
+function createWall(
+    x,
+    y,
+    z,
+    sx,
+    sy,
+    sz
+){
+
+    const wall=
+        new THREE.Mesh(
+            new THREE.BoxGeometry(
+                sx,
+                sy,
+                sz
+            ),
+            new THREE.MeshStandardMaterial({
+                color:0xe4e0d8
+            })
+        );
+
+    wall.position.set(
+        x,
+        y,
+        z
+    );
+
+    wall.castShadow=true;
+    wall.receiveShadow=true;
+
+    scene.add(wall);
+
+    return wall;
+}
+
+/* =========================================================
+   RECEPTION
+========================================================= */
+
+function createReception(){
+
+    const desk=
+        new THREE.Mesh(
+            new THREE.BoxGeometry(
+                5,
+                1.2,
+                1.3
+            ),
+            new THREE.MeshStandardMaterial({
+                color:0x5b3c29
+            })
+        );
+
+    desk.position.set(
+        0,
+        .7,
+        2
+    );
+
+    scene.add(desk);
+
+    const sign=
+        new THREE.Mesh(
+            new THREE.BoxGeometry(
+                3,
+                .8,
+                .15
+            ),
+            new THREE.MeshStandardMaterial({
+                color:0x293b5c
+            })
+        );
+
+    sign.position.set(
+        0,
+        2.5,
+        1.8
+    );
+
+    scene.add(sign);
+
+    const label=
+        createTextSprite(
+            "RECEPTION"
+        );
+
+    label.position.set(
+        0,
+        2.5,
+        1.65
+    );
+
+    label.scale.set(
+        4,
+        1,
+        1
+    );
+
+    scene.add(label);
+}
+
+/* =========================================================
+   ROOMS
+========================================================= */
+
+function createRooms(){
+
+    for(
+        let i=0;
+        i<game.rooms;
+        i++
+    ){
+
+        createRoom(
+            i
+        );
+    }
+}
+
+function createRoom(index){
+
+    let pos;
+
+    if(index<roomPositions.length){
+
+        pos=roomPositions[index];
+
+    }else{
+
+        const row=
+            Math.floor(index/5);
+
+        const col=
+            index%5;
+
+        pos={
+            x:-7+col*5,
+            z:-7-row*5
+        };
+    }
+
+    const room=
+        new THREE.Mesh(
+            new THREE.BoxGeometry(
+                4.5,
+                3,
+                4
+            ),
+            new THREE.MeshStandardMaterial({
+                color:0x687c94
+            })
+        );
+
+    room.position.set(
+        pos.x,
+        1.5,
+        pos.z
+    );
+
+    room.castShadow=true;
+
+    scene.add(room);
+
+    room.userData={
+        type:"room",
+        room:index,
+        dirty:false
+    };
+
+    roomObjects.push(room);
+
+    /* Bed */
+
+    const bed=
+        new THREE.Mesh(
+            new THREE.BoxGeometry(
+                2.2,
+                .6,
+                1.8
+            ),
+            new THREE.MeshStandardMaterial({
+                color:0xf0eeee
+            })
+        );
+
+    bed.position.set(
+        pos.x,
+        .45,
+        pos.z
+    );
+
+    scene.add(bed);
+
+    /* Door */
+
+    const door=
+        new THREE.Mesh(
+            new THREE.BoxGeometry(
+                1.2,
+                2.2,
+                .15
+            ),
+            new THREE.MeshStandardMaterial({
+                color:0x4b3020
+            })
+        );
+
+    door.position.set(
+        pos.x,
+        1.1,
+        pos.z+2.05
+    );
+
+    scene.add(door);
+
+    /* Room number */
+
+    const number=
+        createTextSprite(
+            "ROOM " + (index+1)
+        );
+
+    number.position.set(
+        pos.x,
+        3.5,
+        pos.z+2
+    );
+
+    number.scale.set(
+        3,
+        .8,
+        1
+    );
+
+    scene.add(number);
+}
+
+/* =========================================================
+   TEXT SPRITE
+========================================================= */
+
+function createTextSprite(text){
+
+    const canvas=
+        document.createElement(
+            "canvas"
+        );
+
+    canvas.width=512;
+    canvas.height=128;
+
+    const ctx=
+        canvas.getContext("2d");
+
+    ctx.fillStyle=
+        "rgba(20,25,35,.85)";
+
+    ctx.fillRect(
+        0,
+        0,
+        512,
+        128
+    );
+
+    ctx.fillStyle="white";
+
+    ctx.font="bold 48px Arial";
+
+    ctx.textAlign="center";
+
+    ctx.fillText(
+        text,
+        256,
+        80
+    );
+
+    const texture=
+        new THREE.CanvasTexture(
+            canvas
+        );
+
+    const material=
+        new THREE.SpriteMaterial({
+            map:texture,
+            transparent:true
+        });
+
+    return new THREE.Sprite(
+        material
+    );
+}
+
+/* =========================================================
+   CUSTOMER
+========================================================= */
+
+function spawnCustomer(){
+
+    const customer=
+        new THREE.Mesh(
+            new THREE.CapsuleGeometry(
+                .35,
+                1.1,
+                4,
+                8
+            ),
+            new THREE.MeshStandardMaterial({
+                color:
+                    Math.random()>.5
+                    ?0x3866a8
+                    :0xa84949
+            })
+        );
+
+    customer.position.set(
+        -2,
+        .9,
+        15
+    );
+
+    customer.castShadow=true;
+
+    scene.add(customer);
+
+    const data={
+        object:customer,
+        state:"walkingToReception",
+        targetRoom:-1,
+        timer:0,
+        paid:false
+    };
+
+    customers.push(data);
+
+    game.guests++;
+
+    updateUI();
+}
+
+/* =========================================================
+   CUSTOMER MOVEMENT
+========================================================= */
+
+function updateCustomers(delta){
+
+    customers.forEach(customer=>{
+
+        const obj=
+            customer.object;
+
+        if(
+            customer.state===
+            "walkingToReception"
+        ){
+
+            moveObjectTo(
+                obj,
+                0,
+                3,
+                delta
+            );
+
+            if(
+                distance(
+                    obj.position.x,
+                    obj.position.z,
+                    0,
+                    3
+                )<.8
+            ){
+
+                customer.state=
+                    "waitingForCheckin";
+
+                notify(
+                    "🛎️ A guest is waiting at reception!"
+                );
+            }
+
+        }
+
+        else if(
+            customer.state===
+            "walkingToRoom"
+        ){
+
+            const room=
+                getRoomPosition(
+                    customer.targetRoom
+                );
+
+            moveObjectTo(
+                obj,
+                room.x,
+                room.z,
+                delta
+            );
+
+            if(
+                distance(
+                    obj.position.x,
+                    obj.position.z,
+                    room.x,
+                    room.z
+                )<.8
+            ){
+
+                customer.state=
+                    "staying";
+
+                customer.timer=
+                    35;
+
+                notify(
+                    "🛏️ Guest entered Room " +
+                    (customer.targetRoom+1)
+                );
+            }
+        }
+
+        else if(
+            customer.state===
+            "staying"
+        ){
+
+            customer.timer-=delta;
+
+            if(
+                customer.timer<=0
+            ){
+
+                customer.state=
+                    "leaving";
+
+                const room=
+                    getRoomPosition(
+                        customer.targetRoom
+                    );
+
+                /* Make room dirty */
+
+                game.roomStates[
+                    customer.targetRoom
+                ]="dirty";
+
+                game.cleanRooms=
+                    Math.max(
+                        0,
+                        game.cleanRooms-1
+                    );
+
+                /* Guest pays */
+
+                if(!customer.paid){
+
+                    customer.paid=true;
+
+                    addMoney(
+                        game.roomPrice
+                    );
+
+                    notify(
+                        "💵 Guest checked out! +" +
+                        formatMoney(
+                            game.roomPrice
+                        )
+                    );
+                }
+            }
+        }
+
+        else if(
+            customer.state===
+            "leaving"
+        ){
+
+            moveObjectTo(
+                obj,
+                0,
+                15,
+                delta
+            );
+
+            if(
+                obj.position.z>14
+            ){
+
+                scene.remove(obj);
+
+                customer.state=
+                    "gone";
+            }
+        }
+
+    });
+
+    customers=
+        customers.filter(
+            c=>c.state!=="gone"
+        );
+}
+
+/* =========================================================
+   CHECK-IN
+========================================================= */
+
+function checkInNearestCustomer(){
+
+    let nearest=null;
+
+    let nearestDistance=999;
+
+    customers.forEach(customer=>{
+
+        if(
+            customer.state===
+            "waitingForCheckin"
+        ){
+
+            const d=
+                distance(
+                    player.x,
+                    player.z,
+                    customer.object.position.x,
+                    customer.object.position.z
+                );
+
+            if(
+                d<nearestDistance
+            ){
+
+                nearestDistance=d;
+                nearest=customer;
+            }
+        }
+
+    });
+
+    if(
+        nearest &&
+        nearestDistance<4
+    ){
+
+        let room=
+            findCleanRoom();
+
+        if(room===-1){
+
+            notify(
+                "❌ No clean rooms available!"
+            );
+
+            return;
+        }
+
+        nearest.targetRoom=room;
+
+        nearest.state=
+            "walkingToRoom";
+
+        notify(
+            "🛎️ Check-in complete! Guest is going to Room " +
+            (room+1)
+        );
+
+        updateObjective(
+            "Follow your guest to their room."
+        );
+
+    }else{
+
+        notify(
+            "You need to stand near the reception guest."
+        );
+    }
+}
+
+/* =========================================================
+   CLEANING
+========================================================= */
+
+function cleanRoom(){
+
+    let nearest=-1;
+    let best=999;
+
+    for(
+        let i=0;
+        i<game.rooms;
+        i++
+    ){
+
+        if(
+            game.roomStates[i]==="dirty"
+        ){
+
+            const pos=
+                getRoomPosition(i);
+
+            const d=
+                distance(
+                    player.x,
+                    player.z,
+                    pos.x,
+                    pos.z
+                );
+
+            if(
+                d<best
+            ){
+
+                best=d;
+                nearest=i;
+            }
+        }
+    }
+
+    if(
+        nearest!==-1 &&
+        best<4
+    ){
+
+        game.roomStates[
+            nearest
+        ]="clean";
+
+        game.cleanRooms++;
+
+        game.reputation=
+            Math.min(
+                5,
+                game.reputation+.02
+            );
+
+        notify(
+            "🧹 Room " +
+            (nearest+1) +
+            " cleaned!"
+        );
+
+        updateObjective(
+            "Return to reception and wait for another guest."
+        );
+
+        updateUI();
+
+    }else{
+
+        notify(
+            "There are no dirty rooms nearby."
+        );
+    }
+}
+
+/* =========================================================
+   ROOM HELPERS
+========================================================= */
+
+function getRoomPosition(index){
+
+    if(
+        index<roomPositions.length
+    ){
+
+        return roomPositions[index];
+    }
+
+    const row=
+        Math.floor(index/5);
+
+    const col=
+        index%5;
+
+    return {
+        x:-7+col*5,
+        z:-7-row*5
+    };
+}
+
+function findCleanRoom(){
+
+    for(
+        let i=0;
+        i<game.rooms;
+        i++
+    ){
+
+        if(
+            !game.roomStates[i] ||
+            game.roomStates[i]==="clean"
+        ){
+
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+/* =========================================================
+   MOVEMENT
+========================================================= */
+
+function moveObjectTo(
+    object,
+    tx,
+    tz,
+    delta
+){
+
+    const dx=
+        tx-object.position.x;
+
+    const dz=
+        tz-object.position.z;
+
+    const length=
+        Math.sqrt(
+            dx*dx+
+            dz*dz
+        );
+
+    if(length<.01)
+        return;
+
+    object.position.x +=
+        dx/length *
+        2 *
+        delta;
+
+    object.position.z +=
+        dz/length *
+        2 *
+        delta;
+
+    object.lookAt(
+        tx,
+        object.position.y,
+        tz
+    );
+}
+
+/* =========================================================
+   CONTROLS
+========================================================= */
+
+function setupControls(){
+
+    document.addEventListener(
+        "keydown",
+        e=>{
+            keys[e.code]=true;
+
+            if(e.code==="KeyE"){
+                interact();
+            }
+        }
+    );
+
+    document.addEventListener(
+        "keyup",
+        e=>{
+            keys[e.code]=false;
+        }
+    );
+
+    document.addEventListener(
+        "click",
+        ()=>{
+            if(
+                !firstPersonLocked
+            ){
+
+                document.body.requestPointerLock();
+
+                firstPersonLocked=true;
+
+                document.getElementById(
+                    "locked"
+                ).style.display="none";
+            }
+        }
+    );
+
+    document.addEventListener(
+        "mousemove",
+        e=>{
+
+            if(
+                document.pointerLockElement
+                !==document.body
+            )
+                return;
+
+            camera.rotation.y
+                -= e.movementX*.002;
+
+            camera.rotation.x
+                -= e.movementY*.002;
+
+            camera.rotation.x=
+                Math.max(
+                    -Math.PI/2+.1,
+                    Math.min(
+                        Math.PI/2-.1,
+                        camera.rotation.x
+                    )
+                );
+        }
+    );
+
+    window.addEventListener(
+        "resize",
+        ()=>{
+            camera.aspect=
+                window.innerWidth/
+                window.innerHeight;
+
+            camera.updateProjectionMatrix();
+
+            renderer.setSize(
+                window.innerWidth,
+                window.innerHeight
+            );
+        }
+    );
+}
+
+/* =========================================================
+   PLAYER
+========================================================= */
+
+function updatePlayer(delta){
+
+    let forward=0;
+    let right=0;
+
+    if(keys["KeyW"])
+        forward+=1;
+
+    if(keys["KeyS"])
+        forward-=1;
+
+    if(keys["KeyD"])
+        right+=1;
+
+    if(keys["KeyA"])
+        right-=1;
+
+    if(
+        forward===0 &&
+        right===0
+    )
+        return;
+
+    const speed=
+        player.speed*delta;
+
+    const direction=
+        new THREE.Vector3();
+
+    camera.getWorldDirection(
+        direction
+    );
+
+    direction.y=0;
+
+    direction.normalize();
+
+    const rightVector=
+        new THREE.Vector3(
+            -direction.z,
+            0,
+            direction.x
+        );
+
+    camera.position.x +=
+        direction.x *
+        forward *
+        speed;
+
+    camera.position.z +=
+        direction.z *
+        forward *
+        speed;
+
+    camera.position.x +=
+        rightVector.x *
+        right *
+        speed;
+
+    camera.position.z +=
+        rightVector.z *
+        right *
+        speed;
+
+    /* Hotel boundary */
+
+    camera.position.x=
+        Math.max(
+            -11,
+            Math.min(
+                17,
+                camera.position.x
+            )
+        );
+
+    camera.position.z=
+        Math.max(
+            -11,
+            Math.min(
+                6,
+                camera.position.z
+            )
+        );
+
+    player.x=
+        camera.position.x;
+
+    player.z=
+        camera.position.z;
+}
+
+/* =========================================================
+   INTERACTION
+========================================================= */
+
+function interact(){
+
+    /* Reception */
+
+    let receptionDistance=
+        distance(
+            player.x,
+            player.z,
+            0,
+            3
+        );
+
+    if(
+        receptionDistance<4
+    ){
+
+        checkInNearestCustomer();
+
+        return;
+    }
+
+    /* Cleaning */
+
+    cleanRoom();
+}
+
+/* =========================================================
+   INTERACTION UI
+========================================================= */
+
+function updateInteraction(){
+
+    const ui=
+        document.getElementById(
+            "interaction"
+        );
+
+    let receptionGuest=false;
+
+    customers.forEach(c=>{
+
+        if(
+            c.state===
+            "waitingForCheckin"
+        ){
+
+            const d=
+                distance(
+                    player.x,
+                    player.z,
+                    c.object.position.x,
+                    c.object.position.z
+                );
+
+            if(d<4)
+                receptionGuest=true;
+        }
+
+    });
+
+    if(receptionGuest){
+
+        ui.style.display="block";
+
+        ui.innerHTML=
+            "Press <b>E</b> to Check In Guest";
+
+        return;
+    }
+
+    /* Dirty room */
+
+    for(
+        let i=0;
+        i<game.rooms;
+        i++
+    ){
+
+        if(
+            game.roomStates[i]==="dirty"
+        ){
+
+            const pos=
+                getRoomPosition(i);
+
+            if(
+                distance(
+                    player.x,
+                    player.z,
+                    pos.x,
+                    pos.z
+                )<4
+            ){
+
+                ui.style.display="block";
+
+                ui.innerHTML=
+                    "Press <b>E</b> to Clean Room";
+
+                return;
+            }
+        }
+    }
+
+    ui.style.display="none";
+}
+
+/* =========================================================
+   BUILDING
+========================================================= */
+
+function openBuildMenu(){
+
+    document.getElementById(
+        "buildMenu"
+    ).style.display="flex";
+
+    document.getElementById(
+        "buildMoney"
+    ).innerText=
+        "Cash: " +
+        formatMoney(game.money);
+}
+
+function closeBuildMenu(){
+
+    document.getElementById(
+        "buildMenu"
+    ).style.display="none";
+}
+
+function buildRooms(){
+
+    if(
+        game.money<500
+    ){
+
+        notify(
+            "❌ You need $500."
+        );
+
+        return;
+    }
+
+    game.money-=500;
+
+    for(
+        let i=0;
+        i<5;
+        i++
+    ){
+
+        const index=
+            game.rooms;
+
+        game.rooms++;
+
+        game.roomStates[index]="clean";
+
+        createRoom(index);
+    }
+
+    notify(
+        "🏗️ Five new rooms built!"
+    );
+
+    closeBuildMenu();
+
+    updateUI();
+}
+
+function buildPizzeria(){
+
+    if(
+        game.buildings.pizzeria
+    ){
+
+        notify(
+            "You already own a Pizzeria."
+        );
+
+        return;
+    }
+
+    if(
+        game.money<5000
+    ){
+
+        notify(
+            "❌ You need $5,000."
+        );
+
+        return;
+    }
+
+    game.money-=5000;
+
+    game.buildings.pizzeria=true;
+
+    createBusiness(
+        "🍕 PIZZERIA",
+        28,
+        -2
+    );
+
+    notify(
+        "🍕 Pizzeria built!"
+    );
+
+    closeBuildMenu();
+
+    updateUI();
+}
+
+function buildRestaurant(){
+
+    if(
+        game.buildings.restaurant
+    ){
+
+        notify(
+            "You already own a Restaurant."
+        );
+
+        return;
+    }
+
+    if(
+        game.money<15000
+    ){
+
+        notify(
+            "❌ You need $15,000."
+        );
+
+        return;
+    }
+
+    game.money-=15000;
+
+    game.buildings.restaurant=true;
+
+    createBusiness(
+        "🍽️ RESTAURANT",
+        28,
+        -10
+    );
+
+    notify(
+        "🍽️ Restaurant built!"
+    );
+
+    closeBuildMenu();
+
+    updateUI();
+}
+
+function buildParking(){
+
+    if(
+        game.buildings.parking
+    ){
+
+        notify(
+            "You already own Parking."
+        );
+
+        return;
+    }
+
+    if(
+        game.money<2000
+    ){
+
+        notify(
+            "❌ You need $2,000."
+        );
+
+        return;
+    }
+
+    game.money-=2000;
+
+    game.buildings.parking=true;
+
+    notify(
+        "🚗 Parking area built!"
+    );
+
+    closeBuildMenu();
+
+    updateUI();
+}
+
+function buildMall(){
+
+    if(
+        game.buildings.mall
+    ){
+
+        notify(
+            "You already own a Mall."
+        );
+
+        return;
+    }
+
+    if(
+        game.money<100000
+    ){
+
+        notify(
+            "❌ You need $100,000."
+        );
+
+        return;
+    }
+
+    game.money-=100000;
+
+    game.buildings.mall=true;
+
+    createBusiness(
+        "🛍️ SHOPPING MALL",
+        38,
+        -5
+    );
+
+    notify(
+        "🛍️ Shopping Mall opened!"
+    );
+
+    closeBuildMenu();
+
+    updateUI();
+}
+
+function createBusiness(
+    name,
+    x,
+    z
+){
+
+    const building=
+        new THREE.Mesh(
+            new THREE.BoxGeometry(
+                8,
+                6,
+                7
+            ),
+            new THREE.MeshStandardMaterial({
+                color:0x354765
+            })
+        );
+
+    building.position.set(
+        x,
+        3,
+        z
+    );
+
+    scene.add(building);
+
+    const label=
+        createTextSprite(name);
+
+    label.position.set(
+        x,
+        6.8,
+        z
+    );
+
+    label.scale.set(
+        6,
+        1.5,
+        1
+    );
+
+    scene.add(label);
+}
+
+/* =========================================================
+   WORKERS
+========================================================= */
+
+function hireCleaner(){
+
+    if(
+        game.workers>=1
+    ){
+
+        notify(
+            "You already have a cleaner."
+        );
+
+        return;
+    }
+
+    if(
+        game.money<1000
+    ){
+
+        notify(
+            "❌ You need $1,000."
+        );
+
+        return;
+    }
+
+    game.money-=1000;
+
+    game.workers++;
+
+    createCleaner();
+
+    notify(
+        "👷 Cleaner hired! They will clean dirty rooms automatically."
+    );
+
+    updateUI();
+}
+
+function createCleaner(){
+
+    const cleaner=
+        new THREE.Mesh(
+            new THREE.CapsuleGeometry(
+                .35,
+                1.1,
+                4,
+                8
+            ),
+            new THREE.MeshStandardMaterial({
+                color:0x2ca65a
+            })
+        );
+
+    cleaner.position.set(
+        5,
+        .9,
+        3
+    );
+
+    scene.add(cleaner);
+
+    cleaner.userData.type=
+        "cleaner";
+
+    setInterval(
+        ()=>{
+            workerClean(cleaner);
+        },
+        5000
+    );
+}
+
+function workerClean(worker){
+
+    for(
+        let i=0;
+        i<game.rooms;
+        i++
+    ){
+
+        if(
+            game.roomStates[i]==="dirty"
+        ){
+
+            game.roomStates[i]="clean";
+
+            game.cleanRooms++;
+
+            notify(
+                "👷 Your cleaner cleaned Room " +
+                (i+1)
+            );
+
+            updateUI();
+
+            return;
+        }
+    }
+}
+
+/* =========================================================
+   ECONOMY
+========================================================= */
+
+function addMoney(amount){
+
+    game.money+=amount;
+
+    game.totalEarned+=amount;
+
+    updateUI();
+}
+
+function passiveIncome(){
+
+    let income=0;
+
+    if(
+        game.buildings.pizzeria
+    )
+        income+=2;
+
+    if(
+        game.buildings.restaurant
+    )
+        income+=5;
+
+    if(
+        game.buildings.mall
+    )
+        income+=20;
+
+    if(
+        game.buildings.parking
+    )
+        income+=1;
+
+    if(income>0)
+        addMoney(income);
+}
+
+/* =========================================================
+   RANDOM CUSTOMERS
+========================================================= */
+
+setInterval(
+    ()=>{
+        if(
+            customers.length<5
+        ){
+            spawnCustomer();
+        }
+    },
+    12000
+);
+
+/* =========================================================
+   PASSIVE BUSINESS INCOME
+========================================================= */
+
+setInterval(
+    ()=>{
+        passiveIncome();
+    },
+    1000
+);
+
+/* =========================================================
+   UPDATE UI
+========================================================= */
+
+function updateUI(){
+
+    document.getElementById(
+        "money"
+    ).innerText=
+        formatMoney(game.money);
+
+    document.getElementById(
+        "guests"
+    ).innerText=
+        game.guests;
+
+    document.getElementById(
+        "rooms"
+    ).innerText=
+        game.rooms;
+
+    document.getElementById(
+        "cleanRooms"
+    ).innerText=
+        game.cleanRooms;
+
+    document.getElementById(
+        "rep"
+    ).innerText=
+        game.reputation.toFixed(1);
+
+    updateObjective();
+}
+
+function updateObjective(
+    custom
+){
+
+    const text=
+        document.getElementById(
+            "objectiveText"
+        );
+
+    if(custom){
+
+        text.innerText=custom;
+
+        return;
+    }
+
+    let waiting=false;
+    let dirty=false;
+
+    customers.forEach(
+        c=>{
+            if(
+                c.state===
+                "waitingForCheckin"
+            )
+                waiting=true;
+        }
+    );
+
+    for(
+        let i=0;
+        i<game.rooms;
+        i++
+    ){
+
+        if(
+            game.roomStates[i]==="dirty"
+        )
+            dirty=true;
+    }
+
+    if(waiting){
+
+        text.innerText=
+            "A guest is waiting at reception. Go to the desk and check them in.";
+
+    }else if(dirty){
+
+        text.innerText=
+            "A room is dirty. Go clean it.";
+
+    }else if(
+        game.workers===0 &&
+        game.money<1000
+    ){
+
+        text.innerText=
+            "Work the hotel yourself and earn enough money to hire your first cleaner.";
+
+    }else if(
+        game.workers===0
+    ){
+
+        text.innerText=
+            "You can now hire your first cleaner.";
+
+    }else{
+
+        text.innerText=
+            "Manage your hotel and expand your empire.";
+    }
+}
+
+/* =========================================================
+   FORMAT
+========================================================= */
+
+function formatMoney(n){
+
+    if(
+        n>=1000000
+    )
+        return "$"+
+            (n/1000000)
+            .toFixed(2)+"M";
+
+    if(
+        n>=1000
+    )
+        return "$"+
+            (n/1000)
+            .toFixed(1)+"K";
+
+    return "$"+
+        Math.floor(n);
+}
+
+/* =========================================================
+   DISTANCE
+========================================================= */
+
+function distance(
+    x1,
+    z1,
+    x2,
+    z2
+){
+
+    const dx=x1-x2;
+    const dz=z1-z2;
+
+    return Math.sqrt(
+        dx*dx+
+        dz*dz
+    );
+}
+
+/* =========================================================
+   NOTIFICATION
+========================================================= */
+
+let messageTimeout;
+
+function notify(text){
+
+    const box=
+        document.getElementById(
+            "message"
+        );
+
+    box.innerText=text;
+
+    box.style.display="block";
+
+    clearTimeout(
+        messageTimeout
+    );
+
+    messageTimeout=
+        setTimeout(
+            ()=>{
+                box.style.display="none";
+            },
+            3500
+        );
+}
+
+/* =========================================================
+   SAVE
+========================================================= */
+
+function saveGame(){
 
     localStorage.setItem(
-        "hotelEmpireSave",
+        "hotelEmpireFPS",
         JSON.stringify(game)
     );
 
-    notify("💾 Game saved!");
+    notify(
+        "💾 Game saved!"
+    );
 }
 
-function loadGame() {
+function loadGame(){
 
-    const save =
-        localStorage.getItem("hotelEmpireSave");
+    const save=
+        localStorage.getItem(
+            "hotelEmpireFPS"
+        );
 
-    if(!save)
+    if(!save){
+
+        for(
+            let i=0;
+            i<game.rooms;
+            i++
+        )
+            game.roomStates[i]="clean";
+
         return;
-
-    try {
-        game = JSON.parse(save);
     }
-    catch(e) {
-        console.log("Save error");
+
+    try{
+
+        const loaded=
+            JSON.parse(save);
+
+        game=loaded;
+
+        if(
+            !game.roomStates
+        )
+            game.roomStates=[];
+
+    }catch(e){
+
+        console.log(
+            "Could not load save."
+        );
     }
 }
 
-function resetGame() {
+/* =========================================================
+   AUTO SAVE
+========================================================= */
 
-    if(!confirm("Delete your entire Hotel Empire save?"))
-        return;
+setInterval(
+    ()=>{
+        localStorage.setItem(
+            "hotelEmpireFPS",
+            JSON.stringify(game)
+        );
+    },
+    10000
+);
 
-    localStorage.removeItem("hotelEmpireSave");
+/* =========================================================
+   ANIMATION
+========================================================= */
 
-    location.reload();
+function animate(){
+
+    requestAnimationFrame(
+        animate
+    );
+
+    const delta=
+        Math.min(
+            clock.getDelta(),
+            .05
+        );
+
+    updatePlayer(delta);
+
+    updateCustomers(delta);
+
+    updateInteraction();
+
+    renderer.render(
+        scene,
+        camera
+    );
 }
 
-setInterval(gameTick,1000);
+/* =========================================================
+   START
+========================================================= */
 
-setInterval(updateTime,1000);
-
-setInterval(saveGame,15000);
-
-setInterval(randomEvent,90000);
-
-loadGame();
-
-update();
-
-updateTime();
+init();
 
 </script>
 
